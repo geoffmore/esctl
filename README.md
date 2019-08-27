@@ -18,8 +18,8 @@ than explaining each command, the appropriate endpoint will instead be shown.
 
 ### Functions
 | Command | Description |
-| esctl dbhitf | Get a breakdown on field presence for a host over a span of
-time
+| --- | --- |
+| esctl dbhitf | Get a breakdown on field presence for a host over a span of time |
 
 ## TODO
 See [this](TODO.md)
