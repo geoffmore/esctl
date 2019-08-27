@@ -5,6 +5,8 @@ Todo list for esctl-go
 - [x] Separate authentication into its own package
 - [x] Separate helper utilities into their own package
 - [x] Separate elastic functions into their own package
+- [x] Add CI for building packages
+- [x] Add common badges to README
 - [ ] Add ability to switch between elastic clusters
 - [ ] Add automatic documentation for command usage (https://godoc.org/github.com/spf13/cobra/doc)
 - [ ] Make top level command `esctl` display avaiable subcommands if no
