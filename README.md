@@ -10,11 +10,16 @@ than explaining each command, the appropriate endpoint will instead be shown.
 
 [This link](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec/src/main/resources/rest-api-spec/api) may be a valuable resource in seeing which api endpoints are avaiable.
 
+### Vanilla
 | Command | Endpoint |
 | --- | --- |
 | esctl get cluster-info | / |
 | esctl get cluster-health | /_cluster/health |
 
+### Functions
+| Command | Description |
+| esctl dbhitf | Get a breakdown on field presence for a host over a span of
+time
+
 ## TODO
 See [this](TODO.md)
-

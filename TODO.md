@@ -12,6 +12,8 @@ Todo list for esctl-go
 - [ ] Make second level command `esctl get` display available subcommands if no
   arguements are present
 - [ ] Determine which verbs `esctl` should use other than `get`
+- [ ] Add login command to generate a token
+- [ ] Add config file support
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls
