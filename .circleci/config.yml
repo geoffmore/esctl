@@ -1,0 +1,22 @@
+version: 2.1
+
+executors:
+  golang:
+    working_directory: /tmp/github.com/geoffmore/esctl-go
+    docker:
+      - image: circleci/golang:1.11
+
+jobs:
+  # -----------------------------------------------------------------------------------------------
+  # ----- BUILD -----------------------------------------------------------------------------------
+  # -----------------------------------------------------------------------------------------------
+  build:
+    executor: golang
+    steps:
+      - install
+
+      - run:
+          name: Build the Package
+          command: |
+            go mod verify
+            go build -v github.com/geoffmore/esctl-go/...
