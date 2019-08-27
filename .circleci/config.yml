@@ -1,20 +1,21 @@
-version: 2.1
-
-executors:
-  golang:
-    working_directory: /tmp/github.com/geoffmore/esctl-go
-    docker:
-      - image: circleci/golang:1.11
+version: 2.0
 
 jobs:
   # -----------------------------------------------------------------------------------------------
   # ----- BUILD -----------------------------------------------------------------------------------
   # -----------------------------------------------------------------------------------------------
   build:
-    executor: golang
+    working_directory: /go/src/github.com/geoffmore/esctl-go
+    docker:
+      - image: circleci/golang:1.11
+        environment:
+          # https://github.com/cloudfoundry/go-buildpack/issues/71
+          GO111MODULE: "on"
     steps:
-      - install
-
+      - checkout
+      - run:
+          name: Get the Package
+          command: go get -v -t -d ./...
       - run:
           name: Build the Package
           command: |
