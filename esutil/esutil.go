@@ -3,7 +3,6 @@ package esutil
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -11,18 +10,20 @@ import (
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 )
 
-func Des(esRes *esapi.Response) (r map[string]interface{}) {
+// Deserialize a response into a generic interface
+func Des(esRes *esapi.Response) (r map[string]interface{}, err error) {
 	//statusCode := esRes.StatusCode
 	//header := esRes.Header
 
-	if err := json.NewDecoder(esRes.Body).Decode(&r); err != nil {
-		log.Fatalf("Error parsing the response body: %s", err)
+	if err = json.NewDecoder(esRes.Body).Decode(&r); err != nil {
+		return r, err
 	}
 	defer esRes.Body.Close()
 
-	return r
+	return r, err
 }
 
+// Display a generic interface as yaml
 func MapToYamlish(r map[string]interface{}, s int) {
 	// Going to rely on the value of a null int here. Wish me luck...
 	// j.k, Golang doesn't like that.

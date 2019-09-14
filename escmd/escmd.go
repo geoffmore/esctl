@@ -3,9 +3,6 @@ package escmd
 import (
 	"context"
 	"fmt"
-)
-
-import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl-go/esutil"
@@ -16,17 +13,36 @@ import (
 // documentation, I would assume I could pass a elasticsearch.Client as my
 // transport, but I need to use the Transport type within the object instead
 
-func GetClusterInfo(esClient *elastic7.Client) {
-	resp, _ := esClient.Info()
-	rhee := esutil.Des(resp)
+// GET /_cluster/info
+func GetClusterInfo(esClient *elastic7.Client) error {
+	resp, err := esClient.Info()
+	if err != nil {
+		return err
+	}
+	rhee, err := esutil.Des(resp)
+	if err != nil {
+		return err
+	}
 	esutil.MapToYamlish(rhee, 0)
 	fmt.Println()
+
+	return nil
 }
 
-func GetClusterHealth(esClient *elastic7.Client) {
+// GET /_cluster/health
+func GetClusterHealth(esClient *elastic7.Client) error {
 	req := esapi.ClusterHealthRequest{}
-	res, _ := req.Do(context.Background(), esClient.Transport)
-	rhee := esutil.Des(res)
+	res, err := req.Do(context.Background(), esClient.Transport)
+	if err != nil {
+		return err
+	}
+
+	rhee, err := esutil.Des(res)
+	if err != nil {
+		return err
+	}
 	esutil.MapToYamlish(rhee, 0)
 	fmt.Println()
+
+	return nil
 }
