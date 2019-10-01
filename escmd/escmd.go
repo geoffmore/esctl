@@ -1,12 +1,33 @@
 package escmd
 
 import (
-	"context"
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl-go/esutil"
 )
+
+// If the objective is to only return output, structs are not needed. Once
+// functions requiring data manipulation are introduced, there will be a need
+// for these structs to return. For now, they are being left in the code for
+// historic reference
+
+//type CatIndicesResponse struct {
+//	Health       string `json:"health"`
+//	Status       string `json:"status"`
+//	Index        string `json:"index"`
+//	UUID         string `json:"uuid"`
+//	Pri          string `json:"pri"`
+//	Rep          string `json:"rep"`
+//	DocsCount    string `json:"docs.count"`
+//	DocsDeleted  string `json:"docs.deleted"`
+//	StoreSize    string `json:"store.size"`
+//	PriStoreSize string `json:"pri.store.size"`
+//}
+
+//type CatIndicesStruct struct {
+//	Indices []CatIndicesResponse
+//}
 
 // All methods I've tested other than es7.Info() are not found outside of
 // esapi. In addition, based on the documentation I read on the
@@ -31,18 +52,47 @@ func GetClusterInfo(esClient *elastic7.Client) error {
 
 // GET /_cluster/health
 func GetClusterHealth(esClient *elastic7.Client) error {
-	req := esapi.ClusterHealthRequest{}
-	res, err := req.Do(context.Background(), esClient.Transport)
-	if err != nil {
-		return err
+	req := esapi.ClusterHealthRequest{
+		// There is no Format field here, so the mapToYamlish function will be
+		// required for yaml output
+		//Format: "json",
+		Human:  true,
+		Pretty: true,
 	}
 
-	rhee, err := esutil.Des(res)
-	if err != nil {
-		return err
-	}
-	esutil.MapToYamlish(rhee, 0)
-	fmt.Println()
+	err := request(req, esClient)
+	return err
+}
 
-	return nil
+// GET /_cat/indices
+func CatIndices(esClient *elastic7.Client) error {
+	req := esapi.CatIndicesRequest{
+		Format: "json",
+		Pretty: true,
+	}
+
+	err := request(req, esClient)
+	return err
+}
+
+// GET /_cat/aliases
+func CatAliases(esClient *elastic7.Client) error {
+	req := esapi.CatAliasesRequest{
+		Format: "json",
+		Pretty: true,
+	}
+
+	err := request(req, esClient)
+	return err
+}
+
+// GET /_cat/templates
+func CatTemplates(esClient *elastic7.Client) error {
+	req := esapi.CatTemplatesRequest{
+		Format: "json",
+		Pretty: true,
+	}
+
+	err := request(req, esClient)
+	return err
 }
