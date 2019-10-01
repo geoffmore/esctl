@@ -1,7 +1,6 @@
 package escmd
 
 import (
-	"context"
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
@@ -31,18 +30,14 @@ func GetClusterInfo(esClient *elastic7.Client) error {
 
 // GET /_cluster/health
 func GetClusterHealth(esClient *elastic7.Client) error {
-	req := esapi.ClusterHealthRequest{}
-	res, err := req.Do(context.Background(), esClient.Transport)
-	if err != nil {
-		return err
+	req := esapi.ClusterHealthRequest{
+		// There is no Format field here, so the mapToYamlish function will be
+		// required for yaml output
+		//Format: "json",
+		Human:  true,
+		Pretty: true,
 	}
 
-	rhee, err := esutil.Des(res)
-	if err != nil {
-		return err
-	}
-	esutil.MapToYamlish(rhee, 0)
-	fmt.Println()
-
-	return nil
+	err := request(req, esClient)
+	return err
 }
