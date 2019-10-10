@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/estransport"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -267,6 +268,16 @@ func GenESConfig(cfg Config) (es7cfg elastic7.Config, err error) {
 		tlsClientConfig := &tls.Config{InsecureSkipVerify: true}
 		transport.(*http.Transport).TLSClientConfig = tlsClientConfig
 		es7cfg.Transport = transport
+	}
+
+	// Debug connection stuff. Should be wrapped in a feature flag
+	var debug bool = false
+	if debug {
+		es7cfg.Logger = &estransport.ColorLogger{
+			Output:             os.Stdout,
+			EnableRequestBody:  true,
+			EnableResponseBody: true,
+		}
 	}
 
 	return es7cfg, err
