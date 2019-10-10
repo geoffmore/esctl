@@ -1,12 +1,14 @@
 package escfg
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"net/http"
 	"os"
 )
 
@@ -258,6 +260,15 @@ func GenESConfig(cfg Config) (es7cfg elastic7.Config, err error) {
 		err = fmt.Errorf("None of token, apikey, name + password, or name provided.\n Unable to generate config")
 		return es7cfg, err
 	}
+
+	//https://stackoverflow.com/questions/37557763
+	if currentCluster.AllowSelfSigned == "yes" {
+		transport := http.DefaultTransport
+		tlsClientConfig := &tls.Config{InsecureSkipVerify: true}
+		transport.(*http.Transport).TLSClientConfig = tlsClientConfig
+		es7cfg.Transport = transport
+	}
+
 	return es7cfg, err
 }
 

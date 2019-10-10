@@ -28,6 +28,7 @@ var DefaultConfig = Config{
 				"http://localhost:9200",
 				"http://127.0.0.1:9200",
 			},
+			AllowSelfSigned: "yes",
 		},
 	},
 	Contexts: []Contexts{
@@ -88,7 +89,8 @@ type Cluster struct {
 	Name             string   `yaml:"name"`
 	ElasticAddresses []string `yaml:"elastic-addresses",omitempty`
 	//KibanaAddresses  []string `yaml:"kibana-addresses",omitempty`
-	CloudID string `yaml:"cloud-id",omitempty`
+	CloudID         string `yaml:"cloud-id",omitempty`
+	AllowSelfSigned string `yaml:"allowSelfSigned",omitempty`
 }
 
 // Check if all fields in the Cluster struct have their nil value. Necessary
