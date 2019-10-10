@@ -19,6 +19,19 @@ Todo list for esctl-go
 - [x] Add support for optional modules at compile time
   * [x] Create a script to initialize new modules
   * [x] Create a Makefile that allows compilation of optional modules
+- [x] Add the ability to debug (requires a code change to activate)
+- [ ] Mock [Watcher](https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api.html) apis
+  - [ ] Put Watcher
+  - [ ] Get Watcher
+  - [ ] Delete Watcher
+  - [ ] Execute Watcher
+  - [ ] Get Watcher Stats
+  - [ ] Ack Watcher
+  - [ ] Activate Watcher
+  - [ ] Deactivate Watcher
+  - [ ] Stop Watcher Service
+  - [ ] Start Watcher Service
+  - [x] List Watchers
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls
