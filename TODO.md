@@ -27,11 +27,13 @@ Todo list for esctl-go
   - [ ] Execute Watcher
   - [ ] Get Watcher Stats
   - [ ] Ack Watcher
-  - [ ] Activate Watcher
-  - [ ] Deactivate Watcher
+  - [x] Activate Watcher
+  - [x] Deactivate Watcher
   - [ ] Stop Watcher Service
   - [ ] Start Watcher Service
   - [x] List Watchers
+  - [x] Show Active Watchers
+  - [x] Show Inactive Watchers
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls
