@@ -10,6 +10,10 @@ import (
 	"io/ioutil"
 )
 
+// Watchers starting with dashes don't work currently because of cobra
+// 'pods_pending' is valid
+// '-pods_pending' is interpreted as having a flag and does not work
+
 func WatcherPut(esClient *elastic7.Client, watch string) error {
 	//req := esapi.WatcherPutWatchRequest{
 	//	Format: "json",
@@ -432,6 +436,7 @@ func WatcherShowInactive(esClient *elastic7.Client) error {
 	for _, watcher := range watchers {
 		fc = string(watcher[0])
 		// ask elastic booth about the dash prefix
+		// Dash prefix is specific to elastic cloud clusters
 		if fc == "-" {
 			systemWatchers = append(systemWatchers, watcher)
 		} else {

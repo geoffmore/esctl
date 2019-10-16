@@ -37,6 +37,10 @@ type esRequest interface {
 
 // Generic function used to execute requests
 func request(r esRequest, c *elastic7.Client) error {
+	// Can request take a format json, yaml as an argument?
+	// If try to serialize using map[string]interface{} my app immediately
+	// becomes less performant, but I wouldn't have to dynamically generate
+	// structs for each different type of response
 	// Error in request execution
 	res, resErr := r.Do(context.Background(), c.Transport)
 	if resErr != nil {
