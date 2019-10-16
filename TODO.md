@@ -22,10 +22,10 @@ Todo list for esctl-go
 - [x] Add the ability to debug (requires a code change to activate)
 - [ ] Mock [Watcher](https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api.html) apis
   - [ ] Put Watcher
-  - [ ] Get Watcher
+  - [x] Get Watcher
   - [ ] Delete Watcher
   - [ ] Execute Watcher
-  - [ ] Get Watcher Stats
+  - [x] Get Watcher Stats
   - [ ] Ack Watcher
   - [x] Activate Watcher
   - [x] Deactivate Watcher
