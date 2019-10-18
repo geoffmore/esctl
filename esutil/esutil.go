@@ -1,14 +1,18 @@
 package esutil
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	elastic7 "github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"io/ioutil"
 	"strings"
 )
 
-import (
-	"github.com/elastic/go-elasticsearch/v7/esapi"
-)
+type esRequest interface {
+	Do(context.Context, esapi.Transport) (*esapi.Response, error)
+}
 
 // Deserialize a response into a generic interface
 func Des(esRes *esapi.Response) (r map[string]interface{}, err error) {
@@ -52,4 +56,35 @@ func MapToYamlish(r map[string]interface{}, s int) {
 			//	mapToYamlish(nestedMap, spaces+1)
 		}
 	}
+}
+
+// Generic function used to execute requests
+func Request(r esRequest, c *elastic7.Client) error {
+	// In the future,
+	// Request should attempt to insert the format of choice into esRequest
+	// (check if it has a Format option) If it does, add it and return the bytes
+	// as is. If it does not, use an interface of map[string]interface{} and
+	// use methods to convert to desired format. Of note is that responses should
+	// be json already, so no action should be required for a default of or
+	// explicitly defined json format. This decoupling help the output format
+	// future in the future. MapToYamlish can almost certainly go away in this
+	// after this body of work.
+
+	res, err := r.Do(context.Background(), c.Transport)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != 200 {
+		return fmt.Errorf("Status Code is %v rather than 200. Exiting...\n", res.StatusCode)
+	}
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	fmt.Printf("%+v\n", string(b))
+
+	return nil
 }

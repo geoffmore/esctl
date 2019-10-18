@@ -8,12 +8,17 @@ Todo list for esctl-go
 - [x] Add CI for building packages
 - [x] Add common badges to README
 - [ ] Add ability to switch between elastic clusters
+  * [x] Via command
+  * [ ] Via flag
 - [ ] Add automatic documentation for command usage (https://godoc.org/github.com/spf13/cobra/doc)
-- [ ] Make top level command `esctl` display avaiable subcommands if no
+- [x] Make top level command `esctl` display avaiable subcommands if no
   arguments are present
-- [ ] Make second level command `esctl get` display available subcommands if no
+- [x] Make second level command `esctl get` display available subcommands if no
   arguements are present
 - [ ] Determine which verbs `esctl` should use other than `get`
+- [x] Add support for optional modules at compile time
+  * [x] Create a script to initialize new modules
+  * [x] Create a Makefile that allows compilation of optional modules
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls

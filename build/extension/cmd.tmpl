@@ -1,0 +1,48 @@
+// +build optional ext {{ .pkg }}
+
+package cmd
+
+import (
+   "github.com/geoffmore/esctl-go/pkg/{{ .pkg }}"
+   "log"
+	"github.com/spf13/cobra"
+)
+
+func init() {
+	rootCmd.AddCommand({{ .pkg }}Cmd)
+   {{ .pkg }}Cmd.AddCommand({{ .pkg }}Test)
+   {{ .pkg }}Cmd.AddCommand({{ .pkg }}Int)
+}
+
+var {{ .pkg }}Cmd = &cobra.Command{
+	// esctl {{ .pkg }}
+	Use:   "{{ .pkg }}",
+	Short: "No description",
+}
+
+var {{ .pkg }}Test = &cobra.Command{
+	// esctl {{ .pkg }} test
+	Use:   "test-cmd",
+	Short: "Generated code to demonstrate project structure",
+	Run: func(cmd *cobra.Command, args []string) {
+		{{ .pkg }}.CmdTest()
+	},
+}
+
+var {{ .pkg }}Int = &cobra.Command{
+	// esctl {{ .pkg }} test
+	Use:   "test-int",
+	Short: "Generated code to demonstrate project structure",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Boilerplate
+		client, err := genClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = {{ .pkg }}.IntegrationTest(client)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
+}
