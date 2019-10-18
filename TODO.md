@@ -1,5 +1,4 @@
 Todo list for esctl-go
-====
 ## Repo 
 - [x] Add Cobra to repo for subcommands
 - [x] Separate authentication into its own package
@@ -19,6 +18,21 @@ Todo list for esctl-go
 - [x] Add support for optional modules at compile time
   * [x] Create a script to initialize new modules
   * [x] Create a Makefile that allows compilation of optional modules
+- [x] Add the ability to debug (requires a code change to activate)
+- [ ] Mock [Watcher](https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api.html) apis
+  - [ ] Put Watcher
+  - [x] Get Watcher
+  - [ ] Delete Watcher
+  - [ ] Execute Watcher
+  - [x] Get Watcher Stats
+  - [ ] Ack Watcher
+  - [x] Activate Watcher
+  - [x] Deactivate Watcher
+  - [ ] Stop Watcher Service
+  - [ ] Start Watcher Service
+  - [x] List Watchers
+  - [x] Show Active Watchers
+  - [x] Show Inactive Watchers
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls

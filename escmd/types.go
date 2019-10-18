@@ -37,22 +37,28 @@ type esRequest interface {
 
 // Generic function used to execute requests
 func request(r esRequest, c *elastic7.Client) error {
-	res, err := r.Do(context.Background(), c.Transport)
-	if err != nil {
-		return err
-	}
-	if res.StatusCode != 200 {
-		return fmt.Errorf("Status Code is %v rather than 200. Exiting...\n", res.StatusCode)
+	// Can request take a format json, yaml as an argument?
+	// If try to serialize using map[string]interface{} my app immediately
+	// becomes less performant, but I wouldn't have to dynamically generate
+	// structs for each different type of response
+	// Error in request execution
+	res, resErr := r.Do(context.Background(), c.Transport)
+	if resErr != nil {
+		return resErr
 	}
 
+	// Read response body
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
+	// Error in http response
+	if res.StatusCode != 200 {
+		return fmt.Errorf("Status Code is %v rather than 200.\n Printed error is: \n%v\n. Exiting...\n", res.StatusCode, string(b))
+	}
 
 	fmt.Printf("%+v\n", string(b))
-
 	return nil
 
 }
