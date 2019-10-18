@@ -1,5 +1,4 @@
 Todo list for esctl-go
-====
 ## Repo 
 - [x] Add Cobra to repo for subcommands
 - [x] Separate authentication into its own package
