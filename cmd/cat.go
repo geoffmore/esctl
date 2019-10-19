@@ -45,7 +45,7 @@ var catIndices = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatIndices(client)
+		err = escmd.CatIndices(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -63,7 +63,7 @@ var catAliases = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatAliases(client)
+		err = escmd.CatAliases(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -81,7 +81,7 @@ var catTemplates = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatTemplates(client)
+		err = escmd.CatTemplates(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -99,7 +99,7 @@ var catAllocation = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatAllocation(client)
+		err = escmd.CatAllocation(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -117,7 +117,7 @@ var catShards = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatShards(client)
+		err = escmd.CatShards(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -135,7 +135,7 @@ var catMaster = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatMaster(client)
+		err = escmd.CatMaster(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -153,7 +153,7 @@ var catNodes = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatNodes(client)
+		err = escmd.CatNodes(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -171,7 +171,7 @@ var catTasks = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatTasks(client)
+		err = escmd.CatTasks(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -189,7 +189,7 @@ var catSegments = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatSegments(client)
+		err = escmd.CatSegments(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -207,7 +207,7 @@ var catCount = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatCount(client)
+		err = escmd.CatCount(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -225,7 +225,7 @@ var catRecovery = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatRecovery(client)
+		err = escmd.CatRecovery(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -243,7 +243,7 @@ var catHealth = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatHealth(client)
+		err = escmd.CatHealth(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -261,7 +261,7 @@ var catPendingTasks = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatPendingTasks(client)
+		err = escmd.CatPendingTasks(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -279,7 +279,7 @@ var catThreadPool = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatThreadPool(client)
+		err = escmd.CatThreadPool(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -297,7 +297,7 @@ var catPlugins = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatPlugins(client)
+		err = escmd.CatPlugins(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -315,7 +315,7 @@ var catFielddata = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatFielddata(client)
+		err = escmd.CatFielddata(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -333,7 +333,7 @@ var catNodeattrs = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatNodeattrs(client)
+		err = escmd.CatNodeattrs(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -351,7 +351,7 @@ var catRepositories = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.CatRepositories(client)
+		err = escmd.CatRepositories(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
