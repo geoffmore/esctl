@@ -5,6 +5,7 @@ import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl-go/esutil"
+	"reflect"
 )
 
 // All methods I've tested other than es7.Info() are not found outside of
@@ -29,15 +30,20 @@ func GetClusterInfo(esClient *elastic7.Client) error {
 }
 
 // GET /_cluster/health
-func GetClusterHealth(esClient *elastic7.Client) error {
+func GetClusterHealth(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.ClusterHealthRequest{
-		// There is no Format field here, so the mapToYamlish function will be
-		// required for yaml output
-		//Format: "json",
 		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }

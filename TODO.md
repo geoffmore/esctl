@@ -33,6 +33,7 @@ Todo list for esctl-go
   - [x] List Watchers
   - [x] Show Active Watchers
   - [x] Show Inactive Watchers
+- [x] Add support for output format flag
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls

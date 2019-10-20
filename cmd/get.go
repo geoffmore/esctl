@@ -46,7 +46,7 @@ var getClusterHealth = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = escmd.GetClusterHealth(client)
+		err = escmd.GetClusterHealth(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}

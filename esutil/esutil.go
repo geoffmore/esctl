@@ -133,3 +133,29 @@ func RequestNew(r esRequest, c *elastic7.Client) ([]byte, error) {
 
 	return b, nil
 }
+
+// Attempt to change the 'Format' field of a struct if it exists.
+// Return whether the field exists and could be set
+func SetFormat(s reflect.Value, outputFmt string) bool {
+	// https://blog.golang.org/laws-of-reflection
+	var matches bool
+
+	var fieldExists bool = s.FieldByName("Format").IsValid()
+	var canSet bool = s.CanSet()
+
+	if s.Kind() == reflect.Struct {
+		if fieldExists {
+			// Attempt to change output format
+			switch outputFmt {
+			case "json":
+				matches = true
+			case "yaml":
+				matches = true
+			}
+			if matches && canSet {
+				s.FieldByName("Format").SetString(outputFmt)
+			}
+		}
+	}
+	return fieldExists && canSet
+}
