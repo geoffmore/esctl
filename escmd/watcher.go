@@ -6,8 +6,10 @@ import (
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/geoffmore/esctl-go/esutil"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"reflect"
 )
 
 // Watchers starting with dashes don't work currently because of cobra
@@ -26,31 +28,44 @@ func WatcherPut(esClient *elastic7.Client, watch string) error {
 	return nil
 }
 
-func WatcherGet(esClient *elastic7.Client, watch string) error {
+func WatcherGet(esClient *elastic7.Client, watch string, outputFmt string) error {
 	req := esapi.WatcherGetWatchRequest{
 		WatchID: watch,
 		Pretty:  true,
 		Human:   true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
-	//fmt.Println("not yet implemented")
-	//return nil
+
 }
-func WatcherDelete(esClient *elastic7.Client, watch string) error {
+func WatcherDelete(esClient *elastic7.Client, watch string, outputFmt string) error {
 	req := esapi.WatcherDeleteWatchRequest{
 		WatchID: watch,
 		Pretty:  true,
 		Human:   true,
 	}
 
-	err := request(req, esClient)
-	//fmt.Println("not yet implemented")
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
-	//return nil
 }
-func WatcherExecute(esClient *elastic7.Client, watch string) error {
+func WatcherExecute(esClient *elastic7.Client, watch string, outputFmt string) error {
 	// Why do I need a body here?
 	//req := esapi.WatcherExecuteWatchRequest{
 	//	Body:   io.Reader,
@@ -63,7 +78,7 @@ func WatcherExecute(esClient *elastic7.Client, watch string) error {
 	//return err
 	return nil
 }
-func WatcherGetStats(esClient *elastic7.Client) error {
+func WatcherGetStats(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.WatcherStatsRequest{
 		// Need to figure out how to pass a filter here
 		//Matric: []string
@@ -71,12 +86,18 @@ func WatcherGetStats(esClient *elastic7.Client) error {
 		Human:  true,
 	}
 
-	err := request(req, esClient)
-	//fmt.Println("not yet implemented")
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
-	//return nil
 }
-func WatcherAck(esClient *elastic7.Client, watch string) error {
+func WatcherAck(esClient *elastic7.Client, watch string, outputFmt string) error {
 	//req := esapi.CHANGEME{
 	//	Format: "json",
 	//	Pretty: true,
@@ -87,7 +108,7 @@ func WatcherAck(esClient *elastic7.Client, watch string) error {
 	//return err
 	return nil
 }
-func WatcherActivate(esClient *elastic7.Client, watch string) error {
+func WatcherActivate(esClient *elastic7.Client, watch string, outputFmt string) error {
 	var watcherDesiredState bool = true
 
 	// Get the current state of the watcher
@@ -105,11 +126,18 @@ func WatcherActivate(esClient *elastic7.Client, watch string) error {
 			Pretty:  true,
 			Human:   true,
 		}
-		err = request(req, esClient)
+
+		// Boilerplate
+		changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+		// // Make a request to get bytes
+		b, err := esutil.RequestNew(req, esClient)
+		if err != nil {
+			return err
+		}
+		// // Print bytes
+		err = esutil.ParseBytes(b, changedField, outputFmt)
 	}
-
 	return err
-
 }
 
 func isWatchActive(esClient *elastic7.Client, watch string) (bool, error) {
@@ -153,7 +181,7 @@ func isWatchActive(esClient *elastic7.Client, watch string) (bool, error) {
 	return output.Status.State.Active, nil
 
 }
-func WatcherDeactivate(esClient *elastic7.Client, watch string) error {
+func WatcherDeactivate(esClient *elastic7.Client, watch string, outputFmt string) error {
 	var watcherDesiredState bool = false
 
 	// Get the current state of the watcher
@@ -171,7 +199,16 @@ func WatcherDeactivate(esClient *elastic7.Client, watch string) error {
 			Pretty:  true,
 			Human:   true,
 		}
-		err = request(req, esClient)
+
+		// Boilerplate
+		changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+		// // Make a request to get bytes
+		b, err := esutil.RequestNew(req, esClient)
+		if err != nil {
+			return err
+		}
+		// // Print bytes
+		err = esutil.ParseBytes(b, changedField, outputFmt)
 	}
 
 	return err
@@ -201,7 +238,7 @@ func WatcherServiceStart(esClient *elastic7.Client) error {
 	return nil
 }
 
-func WatcherList(esClient *elastic7.Client) error {
+func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.SearchRequest{
 		Human:  true,
 		Pretty: true,
@@ -356,7 +393,7 @@ func reduceWatchersTo(esClient *elastic7.Client, desiredState bool) (watchers []
 }
 
 //
-func WatcherShowActive(esClient *elastic7.Client) error {
+func WatcherShowActive(esClient *elastic7.Client, outputFmt string) error {
 	var watcherDesiredState bool = true
 
 	watchers, err := reduceWatchersTo(esClient, watcherDesiredState)
@@ -416,7 +453,7 @@ func WatcherShowActive(esClient *elastic7.Client) error {
 }
 
 // GET /.watches/_search?filter_path=hits.hits._id,hits.hits._source.status.state.active
-func WatcherShowInactive(esClient *elastic7.Client) error {
+func WatcherShowInactive(esClient *elastic7.Client, outputFmt string) error {
 	var watcherDesiredState bool = false
 
 	watchers, err := reduceWatchersTo(esClient, watcherDesiredState)

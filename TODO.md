@@ -33,6 +33,9 @@ Todo list for esctl-go
   - [x] List Watchers
   - [x] Show Active Watchers
   - [x] Show Inactive Watchers
+- [x] Add support for output format flag
+- [ ] Mock [Cluster](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html) apis
+- [ ] Improve error handling to be more verbose
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls

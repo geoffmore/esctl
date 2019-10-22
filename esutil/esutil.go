@@ -6,7 +6,9 @@ import (
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"reflect"
 	"strings"
 )
 
@@ -29,8 +31,6 @@ func Des(esRes *esapi.Response) (r map[string]interface{}, err error) {
 
 // Display a generic interface as yaml
 func MapToYamlish(r map[string]interface{}, s int) {
-	// Going to rely on the value of a null int here. Wish me luck...
-	// j.k, Golang doesn't like that.
 	var nestedMap map[string]interface{}
 	spaces := s
 	if false {
@@ -58,17 +58,13 @@ func MapToYamlish(r map[string]interface{}, s int) {
 	}
 }
 
-// Generic function used to execute requests
+// Convert a generic interface of type map[string]interface{} to yaml bytes
+func MapToYamlBytes(r map[string]interface{}) (b []byte, err error) {
+	return b, err
+}
+
+// Generic function used to execute requests and print results
 func Request(r esRequest, c *elastic7.Client) error {
-	// In the future,
-	// Request should attempt to insert the format of choice into esRequest
-	// (check if it has a Format option) If it does, add it and return the bytes
-	// as is. If it does not, use an interface of map[string]interface{} and
-	// use methods to convert to desired format. Of note is that responses should
-	// be json already, so no action should be required for a default of or
-	// explicitly defined json format. This decoupling help the output format
-	// future in the future. MapToYamlish can almost certainly go away in this
-	// after this body of work.
 
 	res, err := r.Do(context.Background(), c.Transport)
 	if err != nil {
@@ -87,4 +83,79 @@ func Request(r esRequest, c *elastic7.Client) error {
 	fmt.Printf("%+v\n", string(b))
 
 	return nil
+}
+
+// Check if the 'Format' field exists for a struct beneath a provided interface
+func FormatExists(i interface{}) bool {
+	return reflect.ValueOf(i).FieldByName("Format").IsValid()
+}
+
+// Convert bytes into a desired output format
+func ParseBytes(b []byte, fmtExists bool, outputFmt string) (err error) {
+	if outputFmt == "yaml" && !fmtExists {
+		var iface map[string]interface{}
+		err := json.Unmarshal(b, &iface)
+		if err != nil {
+			return err
+		}
+		b, err = yaml.Marshal(iface)
+		if err != nil {
+			// MapToYamlBytes needs to correctly handle generic interfaces without
+			// recursion (unless said recursion relies on a pointer to a byte
+			b, err = MapToYamlBytes(iface)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	fmt.Println(string(b))
+	return nil
+}
+
+// Generic function used to execute requests and return bytes
+func RequestNew(r esRequest, c *elastic7.Client) ([]byte, error) {
+
+	var b []byte
+
+	res, err := r.Do(context.Background(), c.Transport)
+	if err != nil {
+		return b, err
+	}
+	if res.StatusCode != 200 {
+		return b, fmt.Errorf("Status Code is %v rather than 200. Exiting...\n", res.StatusCode)
+	}
+
+	b, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return b, err
+	}
+	defer res.Body.Close()
+
+	return b, nil
+}
+
+// Attempt to change the 'Format' field of a struct if it exists.
+// Return whether the field exists and could be set
+func SetFormat(s reflect.Value, outputFmt string) bool {
+	// https://blog.golang.org/laws-of-reflection
+	var matches bool
+
+	var fieldExists bool = s.FieldByName("Format").IsValid()
+	var canSet bool = s.CanSet()
+
+	if s.Kind() == reflect.Struct {
+		if fieldExists {
+			// Attempt to change output format
+			switch outputFmt {
+			case "json":
+				matches = true
+			case "yaml":
+				matches = true
+			}
+			if matches && canSet {
+				s.FieldByName("Format").SetString(outputFmt)
+			}
+		}
+	}
+	return fieldExists && canSet
 }

@@ -3,205 +3,352 @@ package escmd
 import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/geoffmore/esctl-go/esutil"
+	"reflect"
 )
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/7.2/cat.html
 
 // GET /_cat/indices
-func CatIndices(esClient *elastic7.Client) error {
+func CatIndices(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatIndicesRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/aliases
-func CatAliases(esClient *elastic7.Client) error {
+func CatAliases(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatAliasesRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
-
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/templates
-func CatTemplates(esClient *elastic7.Client) error {
+func CatTemplates(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatTemplatesRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/allocation
-func CatAllocation(esClient *elastic7.Client) error {
+func CatAllocation(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatAllocationRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/shards
-func CatShards(esClient *elastic7.Client) error {
+func CatShards(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatShardsRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/master
-func CatMaster(esClient *elastic7.Client) error {
+func CatMaster(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatMasterRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/nodes
-func CatNodes(esClient *elastic7.Client) error {
+func CatNodes(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatNodesRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
+
 }
 
 // GET /_cat/tasks
-func CatTasks(esClient *elastic7.Client) error {
+func CatTasks(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatTasksRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/segments
-func CatSegments(esClient *elastic7.Client) error {
+func CatSegments(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatSegmentsRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/count
-func CatCount(esClient *elastic7.Client) error {
+func CatCount(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatCountRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/recovery
-func CatRecovery(esClient *elastic7.Client) error {
+func CatRecovery(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatRecoveryRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/health
-func CatHealth(esClient *elastic7.Client) error {
+func CatHealth(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatHealthRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/pending_tasks
-func CatPendingTasks(esClient *elastic7.Client) error {
+func CatPendingTasks(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatPendingTasksRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/thread_pool
-func CatThreadPool(esClient *elastic7.Client) error {
+func CatThreadPool(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatThreadPoolRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/thread_pool/{thread_pools}
+
 // GET /_cat/plugins
-func CatPlugins(esClient *elastic7.Client) error {
+func CatPlugins(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatPluginsRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/fielddata
-func CatFielddata(esClient *elastic7.Client) error {
+func CatFielddata(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatFielddataRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/nodeattrs
-func CatNodeattrs(esClient *elastic7.Client) error {
+func CatNodeattrs(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatNodeattrsRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }
 
 // GET /_cat/repositories
-func CatRepositories(esClient *elastic7.Client) error {
+func CatRepositories(esClient *elastic7.Client, outputFmt string) error {
 	req := esapi.CatRepositoriesRequest{
-		Format: "json",
+		Human:  true,
 		Pretty: true,
 	}
 
-	err := request(req, esClient)
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
 }

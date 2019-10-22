@@ -12,6 +12,11 @@ import (
 // file defined within the package scope for reusability
 var file string = os.Expand(escfg.DefaultElasticConfig, os.Getenv)
 
+var (
+	// Used for flags
+	outputFmt string
+)
+
 // Generates an elasticsearch client from a named file from start to finish
 func genClient() (client *elastic7.Client, err error) {
 
@@ -43,4 +48,8 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVarP(&outputFmt, "output", "o", "", "choice of output format")
 }

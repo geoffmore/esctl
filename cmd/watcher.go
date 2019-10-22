@@ -71,7 +71,7 @@ var watcherGet = &cobra.Command{
 		}
 
 		//err = escmd.WatcherGet(client)
-		err = escmd.WatcherGet(client, args[0])
+		err = escmd.WatcherGet(client, args[0], outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -95,7 +95,7 @@ var watcherDelete = &cobra.Command{
 		}
 
 		//err = escmd.WatcherDelete(client)
-		err = escmd.WatcherDelete(client, args[0])
+		err = escmd.WatcherDelete(client, args[0], outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -119,7 +119,7 @@ var watcherExecute = &cobra.Command{
 		}
 
 		//err = escmd.WatcherExecute(client)
-		err = escmd.WatcherExecute(client, args[0])
+		err = escmd.WatcherExecute(client, args[0], outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -137,7 +137,7 @@ var watcherGetStats = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.WatcherGetStats(client)
+		err = escmd.WatcherGetStats(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,7 +161,7 @@ var watcherAck = &cobra.Command{
 		}
 
 		//err = escmd.WatcherAck(client)
-		err = escmd.WatcherAck(client, args[0])
+		err = escmd.WatcherAck(client, args[0], outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -185,7 +185,7 @@ var watcherActivate = &cobra.Command{
 		}
 
 		//err = escmd.WatcherActivate(client)
-		err = escmd.WatcherActivate(client, args[0])
+		err = escmd.WatcherActivate(client, args[0], outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -209,7 +209,7 @@ var watcherDeactivate = &cobra.Command{
 		}
 
 		//err = escmd.WatcherDeactivate(client)
-		err = escmd.WatcherDeactivate(client, args[0])
+		err = escmd.WatcherDeactivate(client, args[0], outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -263,7 +263,7 @@ var watcherList = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.WatcherList(client)
+		err = escmd.WatcherList(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -279,7 +279,7 @@ var watcherShowActive = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.WatcherShowActive(client)
+		err = escmd.WatcherShowActive(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -295,7 +295,7 @@ var watcherShowInactive = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = escmd.WatcherShowInactive(client)
+		err = escmd.WatcherShowInactive(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}
