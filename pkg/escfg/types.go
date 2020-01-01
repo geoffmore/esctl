@@ -1,6 +1,6 @@
 package escfg
 
-// https://godoc.org/github.com/elastic/go-elasticsearch#Config
+// https://godoc.org/github.com/geoffmore/go-elasticsearch#Config
 // Inspiration from the above. Ideally I only define addresses and username and
 // optionally cloudid, then use that to generate a api key as part of
 // ~/.elastic/config

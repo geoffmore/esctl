@@ -1,8 +1,8 @@
 package escmd
 
 import (
-	elastic7 "github.com/elastic/go-elasticsearch/v7"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
+	elastic7 "github.com/geoffmore/go-elasticsearch/v7"
+	"github.com/geoffmore/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl-go/esutil"
 	"reflect"
 )
@@ -86,9 +86,14 @@ func CatAllocation(esClient *elastic7.Client, outputFmt string) error {
 
 // GET /_cat/shards
 func CatShards(esClient *elastic7.Client, outputFmt string) error {
+	//var help bool = true
 	req := esapi.CatShardsRequest{
 		Human:  true,
 		Pretty: true,
+
+		// Temporary addition
+		//Help: &help,
+		H: []string{"*"},
 	}
 
 	// Boilerplate

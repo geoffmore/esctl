@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	elastic7 "github.com/elastic/go-elasticsearch/v7"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
+	elastic7 "github.com/geoffmore/go-elasticsearch/v7"
+	"github.com/geoffmore/go-elasticsearch/v7/esapi"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
@@ -121,9 +121,9 @@ func RequestNew(r esRequest, c *elastic7.Client) ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
-	if res.StatusCode != 200 {
-		return b, fmt.Errorf("Status Code is %v rather than 200. Exiting...\n", res.StatusCode)
-	}
+	//if res.StatusCode != 200 {
+	//	//return b, fmt.Errorf("Status Code is %v rather than 200. Exiting...\n", res.StatusCode)
+	//}
 
 	b, err = ioutil.ReadAll(res.Body)
 	if err != nil {

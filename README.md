@@ -6,7 +6,7 @@
 
 ----
 
-esctl is a command line client built on [go-elasticsearch](https://github.com/elastic/go-elasticsearch) for interacting with elasticsearch clusters.
+esctl is a command line client built on [go-elasticsearch](https://github.com/geoffmore/go-elasticsearch) for interacting with elasticsearch clusters.
 
 ## Getting started
 ### Install

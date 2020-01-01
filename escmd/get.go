@@ -2,8 +2,8 @@ package escmd
 
 import (
 	"fmt"
-	elastic7 "github.com/elastic/go-elasticsearch/v7"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
+	elastic7 "github.com/geoffmore/go-elasticsearch/v7"
+	"github.com/geoffmore/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl-go/esutil"
 	"reflect"
 )

@@ -36,6 +36,8 @@ Todo list for esctl-go
 - [x] Add support for output format flag
 - [ ] Mock [Cluster](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html) apis
 - [ ] Improve error handling to be more verbose
+- [ ] Add optional help flag that adds the Help field to Requests
+- [ ] Add optional todo flag that returns all fields for a given Request
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls
