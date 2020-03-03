@@ -36,6 +36,7 @@ Todo list for esctl-go
 - [x] Add support for output format flag
 - [ ] Mock [Cluster](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html) apis
 - [ ] Improve error handling to be more verbose
+- [ ] Add API module to make requests in VERB ENDPOINT form to support not yet implemented endpoints
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls
