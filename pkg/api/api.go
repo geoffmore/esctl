@@ -14,6 +14,8 @@ import (
 	"reflect"
 	"strings"
 	//	"time"
+	//"fmt"
+	"io"
 )
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
@@ -165,6 +167,7 @@ func (a apiFooEsRequest) Do(ctx context.Context, transport esapi.Transport) (*es
 		Header:     res.Header,
 		Body:       res.Body,
 	}
+	//fmt.Printf("%+v\n", esRes)
 
 	// How do I avoid a nil pointer here?
 	return &esRes, nil
@@ -210,7 +213,8 @@ func (a apiFooEsRequest) Do(ctx context.Context, transport esapi.Transport) (*es
 //	return err
 //}
 
-func newRequest(esClient *elastic7.Client, method, endpoint string) (*http.Request, error) {
+// inspired by esapi/esapi.request.go
+func newRequest(method, endpoint string, body io.Reader) (*http.Request, error) {
 	var (
 		//method string
 		path strings.Builder
@@ -257,7 +261,8 @@ func newRequest(esClient *elastic7.Client, method, endpoint string) (*http.Reque
 
 	// I don't need a url since estransport.Client.Perform() modifies an existing
 	// URL
-	return http.NewRequest(strings.ToUpper(method), path.String(), nil)
+	// I need a body somewhere. I think that's where my issue is
+	return http.NewRequest(strings.ToUpper(method), path.String(), body)
 }
 func Foo1(esClient *elastic7.Client, outputFmt, method, endpoint string) error {
 	// Create estransport.Client from elasticserch.Client verify that this is
@@ -266,7 +271,7 @@ func Foo1(esClient *elastic7.Client, outputFmt, method, endpoint string) error {
 	//req, err := http.NewRequest(a.method, a.buildURL(), nil)
 	//res, err := transportClient.Perform(req)
 
-	httpReq, err := newRequest(esClient, method, endpoint)
+	httpReq, err := newRequest(method, endpoint, nil)
 	if err != nil {
 		return err
 	}
@@ -285,6 +290,7 @@ func Foo1(esClient *elastic7.Client, outputFmt, method, endpoint string) error {
 	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
+	//fmt.Printf(string(b))
 	if err != nil {
 		return err
 	}
