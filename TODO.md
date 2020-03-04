@@ -37,6 +37,13 @@ Todo list for esctl-go
 - [ ] Mock [Cluster](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html) apis
 - [ ] Improve error handling to be more verbose
 - [ ] Add API module to make requests in VERB ENDPOINT form to support not yet implemented endpoints
+   * [x] MVP
+   * [ ] Support for output format flag and other existing flags
+   * [ ] General alignment with esapi.Request objects (duplicate code)
+   * [ ] Rename functions/structs/interfaces. (Probably GenericRequest and
+     similar)
+   * [ ] Move api subcommand under escmd. It shouldn't be considered an
+     extension/option
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls
