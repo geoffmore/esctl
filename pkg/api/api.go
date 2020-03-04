@@ -147,8 +147,7 @@ func newRequest(method, endpoint string, body io.Reader) (*http.Request, error) 
 	)
 
 	// Validate method
-	// https://golangcode.com/check-if-element-exists-in-slice/
-	_, found := Find(httpRequestMethods, strings.ToUpper(method))
+	_, found := esutil.Find(httpRequestMethods, strings.ToUpper(method))
 	// This is incorrect, and I need to generate an error
 	if !found {
 		return nil, errors.New("InvalidMethodError")
@@ -195,16 +194,4 @@ func MakeGenericRequest(esClient *elastic7.Client, outputFmt, method, endpoint s
 	// // Print bytes
 	err = esutil.ParseBytes(b, changedField, outputFmt)
 	return err
-}
-
-// https://golangcode.com/check-if-element-exists-in-slice/
-// Find takes a slice and looks for an element in it. If found it will
-// return it's key, otherwise it will return -1 and a bool of false.
-func Find(slice []string, val string) (int, bool) {
-	for i, item := range slice {
-		if item == val {
-			return i, true
-		}
-	}
-	return -1, false
 }
