@@ -15,7 +15,7 @@ func init() {
 var apiCmd = &cobra.Command{
 	// esctl api
 	Use:   "api",
-	Short: "No description",
+	Short: "Executes commands using <method> <endpoint> syntax",
 	Args:  cobra.ExactArgs(2),
 	// I need a persistent flag for output format
 	Run: func(cmd *cobra.Command, args []string) {
