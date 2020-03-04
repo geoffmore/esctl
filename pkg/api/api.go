@@ -1,5 +1,3 @@
-// +build api
-
 package api
 
 import (
@@ -7,18 +5,16 @@ import (
 	"errors"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	//"github.com/elastic/go-elasticsearch/v7/estransport"
 	"github.com/geoffmore/esctl-go/esutil"
-	//"math/rand"
+	"io"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
-	//	"time"
-	//"fmt"
-	"io"
 )
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+// Static list of valid HTTP request verbs
 var httpRequestMethods = []string{
 	"GET",
 	"HEAD",
@@ -31,187 +27,117 @@ var httpRequestMethods = []string{
 	"PATCH",
 }
 
-//func CmdTest() {
-//	fmt.Println("Test")
-//}
-
-//func IntegrationTest(esClient *elastic7.Client) error {
-//	req := esapi.ClusterHealthRequest{
-//		Pretty: true,
-//		Human:  true,
-//	}
-//
-//	err := esutil.Request(req, esClient)
-//	return err
-//}
-
-//func buildRequest(esClient *elastic7.Client, method string, endpoint string) (req *http.Request, err error) {
-//	// https://pkg.go.dev/net/http?tab=doc#Request
-//
-//	// Build complete URL
-//	// Validate and add method
-//	// Add optional body? This needs to be supported by a flag. Maybe -d?
-//	// var req http.Request
-//
-//	// I should probably use IsError() syntax eventually
-//	req, err = http.NewRequest(method, url)
-//
-//	// Add auth?
-//
-//	// Validate and add URL from esClient
-//
-//	return req, err
-//}
-
-// Do I pass this up? For now, I say yes
-//func makeRequest(esClient *elastic7.Client, req *http.Request) (response *http.Response, err error) {
-//	//	// func (c *Client) Perform(req *http.Request) (*http.Response, error)
-//	//	res, err = esClient.Perform(req)
-//	//	return response, err
-//}
-//func Do(esClient *elastic7.Client, method string, endpoint string) error {
-//	// Assumes absolutely no errors
-//	req, err = buildRequest(esClient, method, endpoint)
-//	res, err = makeRequest(esClient, req)
-//
-//	// I need:
-//	//type esRequest interface {
-//	//	Do(context.Context, esapi.Transport) (*esapi.Response, error)
-//	//}
-//	// I should find out how to use esutil, but that has its complexities. I
-//	// think it boils down to satisfying this interface: https://godoc.org/github.com/elastic/go-elasticsearch/esapi#Transport
-//
-//	// Transport interface -> esRequest interface
-//}
-
-//type apiFooTransport struct {
-//	// Needs some way to get method, url
-//	// Also needs a buildURL function
-//	// Maybe start with config, select a random url, append the endpoint?
-//
-//	// Adding a *bufio.Reader to the transport because I think that's what it's
-//	// missing
-//	// Should This be io.Reader or *bufio.Reader?
-//	Reader *bufio.Reader
-//}
-
-// type io.Reader interface {
-//    Read(p []byte) (n int, err error)
-//}
-
-// bufio.NewReader(io.Reader) *bufio.Reader
-
-//func makeAPIFooTransport() apiFooTransport {
-//	// bufio.NewReader(io.Reader) *bufio.Reader
-//
-//	// What if es.Client already has a buffered transport?
-//	// Should I be using estransport? It has Perform
-//	return apiFooTransport{
-//		Reader: bufio.NewReader(reader),
-//	}
-//
-//}
-
-// This is now a esapi.Transport
-//func (a apiFooTransport) Perform(req *http.Request) (*http.Response, error) {
-//	// Need to take method and url from the transport
-//	// Need to move that around I should have a request already
-//	//req, err := http.NewRequest(a.method, a.buildURL(), nil)
-//	// Technically, I only need to care about StatusCode, Header, and Body
-//
-//	//func ReadResponse(r *bufio.Reader, req *Request) (*Response, error)
-//	res, err := http.ReadResponse(a.Reader, req)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return res, nil
-//}
-
-//func (a apiFooTransport) buildURL() string {}
-
-// Wrapper around http.Request
-type apiFooEsRequest struct {
+// Wrapper around http.Request with esapi fields
+type GenericRequest struct {
 	Request *http.Request
 	//Path    strings.Builder
+
+	Name       []string
+	Format     string
+	H          []string
+	Help       *bool
+	Local      *bool
+	S          []string
+	V          *bool
+	Pretty     bool
+	Human      bool
+	ErrorTrace bool
+	FilterPath []string
+
+	Header http.Header
+
+	ctx context.Context
 }
 
-// This is now esRequest
-func (a apiFooEsRequest) Do(ctx context.Context, transport esapi.Transport) (*esapi.Response, error) {
+// Inspired by https://github.com/elastic/go-elasticsearch/blob/52d1cf7160ac9b92b81ac6c82acec3f20351d8e7/esapi/api.bulk.go#L64
+// This is now an esRequest than can be used by esutil
+// Has a similar form to most *Request structs under esapi
+func (r GenericRequest) Do(ctx context.Context, transport esapi.Transport) (*esapi.Response, error) {
+	var (
+		params map[string]string
+	)
+	params = make(map[string]string)
 
-	// Use the request to get a response
-	// Maybe
+	if r.Format != "" {
+		params["format"] = r.Format
+	}
 
-	// Start with http response
-	//res
-	// esapi.Response is a http.Response with methods :
+	if len(r.H) > 0 {
+		params["h"] = strings.Join(r.H, ",")
+	}
 
-	// func (r *Response) IsError() bool
-	// func (r *Response) Status() string
-	// func (r *Response) String() string
-	// Actually, it just has a subset of http.Response fields
-	// And it is a struct, not an interface
+	if r.Help != nil {
+		params["help"] = strconv.FormatBool(*r.Help)
+	}
 
-	// context should be added to req, then transport.Perform(req) should be
-	// called
+	if r.Local != nil {
+		params["local"] = strconv.FormatBool(*r.Local)
+	}
 
-	// Ignoring ctx for now
+	if len(r.S) > 0 {
+		params["s"] = strings.Join(r.S, ",")
+	}
 
-	res, err := transport.Perform(a.Request)
+	if r.V != nil {
+		params["v"] = strconv.FormatBool(*r.V)
+	}
+
+	if r.Pretty {
+		params["pretty"] = "true"
+	}
+
+	if r.Human {
+		params["human"] = "true"
+	}
+
+	if r.ErrorTrace {
+		params["error_trace"] = "true"
+	}
+
+	if len(r.FilterPath) > 0 {
+		params["filter_path"] = strings.Join(r.FilterPath, ",")
+	}
+
+	req := r.Request
+
+	if len(params) > 0 {
+		q := req.URL.Query()
+		for k, v := range params {
+			q.Set(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	if len(r.Header) > 0 {
+		if len(req.Header) == 0 {
+			req.Header = r.Header
+		} else {
+			for k, vv := range r.Header {
+				for _, v := range vv {
+					req.Header.Add(k, v)
+				}
+			}
+		}
+	}
+
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	res, err := transport.Perform(r.Request)
 	if err != nil {
 		return nil, err
 	}
 
-	esRes := esapi.Response{
+	response := esapi.Response{
 		StatusCode: res.StatusCode,
-		Header:     res.Header,
 		Body:       res.Body,
+		Header:     res.Header,
 	}
-	//fmt.Printf("%+v\n", esRes)
 
-	// How do I avoid a nil pointer here?
-	return &esRes, nil
-
-	// Below is an example of the Do method. I got pretty close
-	// https://github.com/elastic/go-elasticsearch/blob/52d1cf7160ac9b92b81ac6c82acec3f20351d8e7/esapi/api.bulk.go#L64
+	return &response, nil
 
 }
-
-//func genRequest() esutil.esRequest
-
-// This is esapi.Response
-// type Response struct {
-//    StatusCode int
-//    Header     http.Header
-//    Body       io.ReadCloser
-//}
-
-// What if each subcommand of the api subcommand was a http verb?
-// I don't like that idea. Too much work
-
-//func Foo(esClient *elastic7.Client, outputFmt string, method string, endpoint string) error {
-//
-//	// Make an esRequest
-//	req := genRequest().(esutil.esRequest)
-//	//req := esapi.CatHelpRequest{
-//	//	Human:  true,
-//	//	Pretty: true,
-//
-//	//	// This may be a v7 vs v8 issue. Unlocking v7
-//	//	Help: &help,
-//	//}
-//
-//	// Boilerplate
-//	//changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
-//	// // Make a request to get bytes
-//	b, err := esutil.RequestNew(req, esClient)
-//	if err != nil {
-//		return err
-//	}
-//	// // Print bytes
-//	err = esutil.ParseBytes(b, changedField, outputFmt)
-//	return err
-//}
 
 // inspired by esapi/esapi.request.go
 func newRequest(method, endpoint string, body io.Reader) (*http.Request, error) {
@@ -228,63 +154,35 @@ func newRequest(method, endpoint string, body io.Reader) (*http.Request, error) 
 		return nil, errors.New("InvalidMethodError")
 	}
 
-	// Seed randomness
-	// https://stackoverflow.com/questions/33994677
-	//s := rand.NewSource(time.Now().Unix())
-	//r := rand.New(s)
+	// Strip leading '/' if it exists
+	if strings.HasPrefix(endpoint, "/") {
+		endpoint = strings.TrimLeft(endpoint, "/")
+	}
 
-	// Find the stored URLs in esClient
-	//urls := esClient.Transport.URLs()
-	//esTransportInterface := esClient.Transport.(estransport.Interface)
-	// Can I use reflection here?
-	//esTransportClient := esTransPortInterface.Perform()
-	//tpClient := &esTransport.(estransport.Client)
-	//tpClient := esClient.Transport.(estransport.Client)
-	//urls := esTransport.URLs()
-	//urls := esClient.Transport.(estransport.Client).URLs()
-	//urls := []string{"foo", "bar"}
-	// Select a random address as url
-	//urlIndex := r.Intn(len(urls))
-	//url := urls[urlIndex]
-
-	// Expand path for url
-	//path.Grow(1 + len(url))
-	//path.WriteString(url)
 	// Expand path for endpoint
 	path.Grow(1 + len("/"+endpoint))
 	path.WriteString("/" + endpoint)
-	//method, path.String()
 
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	// I don't need a url since estransport.Client.Perform() modifies an existing
-	// URL
-	// I need a body somewhere. I think that's where my issue is
+	// A full url is not needed since estransport.Client.Perform() modifies an existing
+	// url
 	return http.NewRequest(strings.ToUpper(method), path.String(), body)
 }
-func Foo1(esClient *elastic7.Client, outputFmt, method, endpoint string) error {
-	// Create estransport.Client from elasticserch.Client verify that this is
-	// needed
-	//transportClient := esClient.(estransport.Client)
-	//req, err := http.NewRequest(a.method, a.buildURL(), nil)
-	//res, err := transportClient.Perform(req)
+func MakeGenericRequest(esClient *elastic7.Client, outputFmt, method, endpoint string) error {
 
 	httpReq, err := newRequest(method, endpoint, nil)
 	if err != nil {
 		return err
 	}
 
-	req := apiFooEsRequest{httpReq}
-	// Build a http.Request
-	//req := http.Request{
-	//	Method: parseMethod(method),
-	//	URL:    randURL(esClient),
-	//}
-	// I literally only need to build a request and pass that
+	// Initialize empty struct
+	req := GenericRequest{}
 
-	//type apiFooEsRequest struct {
+	// Add the necessary *http.Request
+	req.Request = httpReq
+
+	// Ease of use. Should probably be a flag
+	req.Pretty = true
+	req.Human = true
 
 	// Boilerplate
 	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)

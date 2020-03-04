@@ -1,5 +1,3 @@
-// +build optional ext api
-
 package cmd
 
 import (
@@ -27,7 +25,7 @@ var apiCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		// I don't like the function name, but it'll have to... _Do_
-		err = api.Foo1(client, "json", args[0], args[1])
+		err = api.MakeGenericRequest(client, outputFmt, args[0], args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
