@@ -19,6 +19,7 @@ var apiCmd = &cobra.Command{
 	Use:   "api",
 	Short: "No description",
 	Args:  cobra.ExactArgs(2),
+	// I need a persistent flag for output format
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
 		client, err := genClient()
@@ -26,7 +27,7 @@ var apiCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		// I don't like the function name, but it'll have to... _Do_
-		err = api.Do(client, args[0], args[1])
+		err = api.Foo1(client, "json", args[0], args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
