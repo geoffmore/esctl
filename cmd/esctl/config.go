@@ -1,8 +1,8 @@
-package main
+package cmd
 
 import (
 	"fmt"
-	"github.com/geoffmore/esctl-go/pkg/escfg"
+	"github.com/geoffmore/esctl/pkg/escfg"
 	"github.com/spf13/cobra"
 	"log"
 )

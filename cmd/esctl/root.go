@@ -1,10 +1,10 @@
-package main
+package cmd
 
 import (
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
-	"github.com/geoffmore/esctl-go/pkg/escfg"
 	"github.com/geoffmore/esctl/pkg/esauth"
+	"github.com/geoffmore/esctl/pkg/escfg"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -42,23 +42,23 @@ var rootCmd = &cobra.Command{
 	Short: "esctl is a utility able to interact with elasticsearch clusters",
 }
 
-func genClient2(ctx string) (client *elastic7.Client, err error) {
-
-	//file := os.Expand(escfg.DefaultElasticConfig, os.Getenv)
-	fileConfig, err := escfg.ReadConfig(file)
-	if err != nil {
-		return client, err
-	}
-	esConfig, err := escfg.Foo(fileConfig, ctx)
-	if err != nil {
-		return client, err
-	}
-	client, err = esauth.EsAuth(esConfig)
-	if err != nil {
-		return client, err
-	}
-	return client, err
-}
+//func genClient2(ctx string) (client *elastic7.Client, err error) {
+//
+//	//file := os.Expand(escfg.DefaultElasticConfig, os.Getenv)
+//	fileConfig, err := escfg.ReadConfig(file)
+//	if err != nil {
+//		return client, err
+//	}
+//	esConfig, err := escfg.Foo(fileConfig, ctx)
+//	if err != nil {
+//		return client, err
+//	}
+//	client, err = esauth.EsAuth(esConfig)
+//	if err != nil {
+//		return client, err
+//	}
+//	return client, err
+//}
 
 // Main function of cobra
 func Execute() {
