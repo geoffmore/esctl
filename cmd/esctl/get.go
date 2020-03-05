@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/geoffmore/esctl-go/escmd"
+	"github.com/geoffmore/esctl/pkg/escmd"
 	"github.com/spf13/cobra"
 	"log"
 )
