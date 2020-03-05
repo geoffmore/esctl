@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
-	"github.com/geoffmore/esctl-go/esauth"
 	"github.com/geoffmore/esctl-go/pkg/escfg"
+	"github.com/geoffmore/esctl/pkg/esauth"
 	"github.com/spf13/cobra"
 	"os"
 )
