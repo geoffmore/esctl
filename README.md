@@ -51,6 +51,6 @@ Run `./build/gen-extension.sh \<your-extension/package name\>`
 Build!
 
 ## List of current and future features
-See [this](TODO.md)
+See [this](docs/TODO.md)
 
 [This link](https://github.com/elastic/elasticsearch/tree/master/rest-api-spec/src/main/resources/rest-api-spec/api) may be a valuable resource in seeing which api endpoints are avaiable.
