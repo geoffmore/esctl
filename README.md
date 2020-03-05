@@ -1,8 +1,8 @@
 # esctl
 
-[![GoDoc](https://godoc.org/github.com/geoffmore/esctl-go?status.svg)](http://godoc.org/github.com/geoffmore/esctl-go)
-[![CircleCI](https://circleci.com/gh/geoffmore/esctl-go.svg?style=svg)](https://circleci.com/gh/geoffmore/esctl-go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/geoffmore/esctl-go)](https://goreportcard.com/report/github.com/geoffmore/esctl-go)
+[![GoDoc](https://godoc.org/github.com/geoffmore/esctl?status.svg)](http://godoc.org/github.com/geoffmore/esctl)
+[![CircleCI](https://circleci.com/gh/geoffmore/esctl.svg?style=svg)](https://circleci.com/gh/geoffmore/esctl)
+[![Go Report Card](https://goreportcard.com/badge/github.com/geoffmore/esctl)](https://goreportcard.com/report/github.com/geoffmore/esctl)
 
 ----
 
