@@ -6,7 +6,7 @@ import (
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/geoffmore/esctl-go/esutil"
+	"github.com/geoffmore/esctl/pkg/esutil"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
