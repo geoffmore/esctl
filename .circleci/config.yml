@@ -5,7 +5,7 @@ jobs:
   # ----- BUILD -----------------------------------------------------------------------------------
   # -----------------------------------------------------------------------------------------------
   build:
-    working_directory: /go/src/github.com/geoffmore/esctl-go
+    working_directory: /go/src/github.com/geoffmore/esctl
     docker:
       - image: circleci/golang:1.11
         environment:
@@ -20,4 +20,4 @@ jobs:
           name: Build the Package
           command: |
             go mod verify
-            go build -v github.com/geoffmore/esctl-go/...
+            go build -v github.com/geoffmore/esctl/cmd/esctl...
