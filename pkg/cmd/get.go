@@ -24,7 +24,7 @@ var getClusterInfo = &cobra.Command{
 	Long:  `No Description`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient2(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -42,7 +42,7 @@ var getClusterHealth = &cobra.Command{
 	Long:  `No Description`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient2(context)
 		if err != nil {
 			log.Fatal(err)
 		}
