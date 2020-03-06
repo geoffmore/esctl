@@ -41,7 +41,7 @@ var watcherPut = &cobra.Command{
 			log.Fatal("%s\n", errMsg)
 		}
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,7 +65,7 @@ var watcherGet = &cobra.Command{
 			log.Fatal("%s\n", errMsg)
 		}
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -89,7 +89,7 @@ var watcherDelete = &cobra.Command{
 			log.Fatal("%s\n", errMsg)
 		}
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -113,7 +113,7 @@ var watcherExecute = &cobra.Command{
 			log.Fatal("%s\n", errMsg)
 		}
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -132,7 +132,7 @@ var watcherGetStats = &cobra.Command{
 	Short: "GET /_watcher/stats",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -155,7 +155,7 @@ var watcherAck = &cobra.Command{
 			log.Fatal("%s\n", errMsg)
 		}
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -179,7 +179,7 @@ var watcherActivate = &cobra.Command{
 			log.Fatal("%s\n", errMsg)
 		}
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -203,7 +203,7 @@ var watcherDeactivate = &cobra.Command{
 			log.Fatal("%s\n", errMsg)
 		}
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -222,7 +222,7 @@ var watcherServiceStop = &cobra.Command{
 	Short: "POST /_watcher/_stop",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -240,7 +240,7 @@ var watcherServiceStart = &cobra.Command{
 	Short: "POST /_watcher/_start",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -258,7 +258,7 @@ var watcherList = &cobra.Command{
 	Short: "GET /.watches/_search?filter_path=hits.hits._id",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -274,7 +274,7 @@ var watcherShowActive = &cobra.Command{
 	Short: "Show active watchers",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -290,7 +290,7 @@ var watcherShowInactive = &cobra.Command{
 	Short: "Show inactive watchers",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient2(context)
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}

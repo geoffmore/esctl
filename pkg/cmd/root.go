@@ -39,7 +39,7 @@ func Execute() {
 }
 
 // Generates an elasticsearch client from a named file from start to finish
-func genClient2(ctx string) (client *elastic7.Client, err error) {
+func genClient(ctx string) (client *elastic7.Client, err error) {
 
 	//file := os.Expand(escfg.DefaultElasticConfig, os.Getenv)
 	fileConfig, err := escfg.ReadConfig(file)
