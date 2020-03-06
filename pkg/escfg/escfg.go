@@ -159,7 +159,17 @@ func IsValidCfg(b []byte) bool {
 	return true
 
 }
-func GenESConfig(cfg Config) (es7cfg elastic7.Config, err error) {
+
+// Prompt for password to authenticate a request
+func askPass() (str string, err error) {
+	fmt.Printf("Enter your password to connect as user: ")
+	b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	str = string(b)
+	fmt.Printf("\n\n")
+	return str, err
+}
+
+func GenESConfig(cfg Config, ctx string) (es7cfg elastic7.Config, err error) {
 	// Order of operations
 	// --- Cluster ---
 	// Ordered by completeness of information
@@ -184,7 +194,13 @@ func GenESConfig(cfg Config) (es7cfg elastic7.Config, err error) {
 	var currentContextName string
 
 	// Get the current context
-	currentContextName = cfg.CurrentContext
+	// Edit: try provided ctx variable
+	if ctx != "" {
+		currentContextName = ctx
+	} else {
+		currentContextName = cfg.CurrentContext
+	}
+
 	if currentContextName == "" {
 		err = fmt.Errorf("Current context not defined")
 		return es7cfg, err
@@ -281,13 +297,4 @@ func GenESConfig(cfg Config) (es7cfg elastic7.Config, err error) {
 	}
 
 	return es7cfg, err
-}
-
-// Prompt for password to authenticate a request
-func askPass() (str string, err error) {
-	fmt.Printf("Enter your password to connect as user: ")
-	b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
-	str = string(b)
-	fmt.Printf("\n\n")
-	return str, err
 }

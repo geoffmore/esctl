@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/geoffmore/esctl/pkg/escmd"
@@ -24,7 +24,7 @@ var getClusterInfo = &cobra.Command{
 	Long:  `No Description`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -42,7 +42,7 @@ var getClusterHealth = &cobra.Command{
 	Long:  `No Description`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/geoffmore/esctl/pkg/escmd"
@@ -40,7 +40,7 @@ var catIndices = &cobra.Command{
 	Short: "GET /_cat/indices",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -58,7 +58,7 @@ var catAliases = &cobra.Command{
 	Short: "GET /_cat/aliases",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -76,7 +76,7 @@ var catTemplates = &cobra.Command{
 	Short: "GET /_cat/templates",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -94,7 +94,7 @@ var catAllocation = &cobra.Command{
 	Short: "GET /_cat/allocation",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -112,7 +112,7 @@ var catShards = &cobra.Command{
 	Short: "GET /_cat/shards",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -130,7 +130,7 @@ var catMaster = &cobra.Command{
 	Short: "GET /_cat/master",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -148,7 +148,7 @@ var catNodes = &cobra.Command{
 	Short: "GET /_cat/nodes",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -166,7 +166,7 @@ var catTasks = &cobra.Command{
 	Short: "GET /_cat/tasks",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -184,7 +184,7 @@ var catSegments = &cobra.Command{
 	Short: "GET /_cat/segments",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -202,7 +202,7 @@ var catCount = &cobra.Command{
 	Short: "GET /_cat/count",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -220,7 +220,7 @@ var catRecovery = &cobra.Command{
 	Short: "GET /_cat/recovery",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -238,7 +238,7 @@ var catHealth = &cobra.Command{
 	Short: "GET /_cat/health",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -256,7 +256,7 @@ var catPendingTasks = &cobra.Command{
 	Short: "GET /_cat/pending_tasks",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -274,7 +274,7 @@ var catThreadPool = &cobra.Command{
 	Short: "GET /_cat/thread_pool",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -292,7 +292,7 @@ var catPlugins = &cobra.Command{
 	Short: "GET /_cat/plugins",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -310,7 +310,7 @@ var catFielddata = &cobra.Command{
 	Short: "GET /_cat/fielddata",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -328,7 +328,7 @@ var catNodeattrs = &cobra.Command{
 	Short: "GET /_cat/nodeattrs",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -346,7 +346,7 @@ var catRepositories = &cobra.Command{
 	Short: "GET /_cat/repositories",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		client, err := genClient()
+		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
