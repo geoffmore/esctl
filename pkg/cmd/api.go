@@ -20,8 +20,8 @@ var apiCmd = &cobra.Command{
 	// I need a persistent flag for output format
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate
-		//client, err := genClient2(context)
-		client, err := genClient()
+		client, err := genClient2(context)
+		//client, err := genClient()
 		if err != nil {
 			log.Fatal(err)
 		}
