@@ -169,7 +169,7 @@ func askPass() (str string, err error) {
 	return str, err
 }
 
-func GenESConfig2(cfg Config, ctx string) (es7cfg elastic7.Config, err error) {
+func GenESConfig(cfg Config, ctx string) (es7cfg elastic7.Config, err error) {
 	// Order of operations
 	// --- Cluster ---
 	// Ordered by completeness of information

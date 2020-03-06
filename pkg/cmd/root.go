@@ -46,7 +46,7 @@ func genClient(ctx string) (client *elastic7.Client, err error) {
 	if err != nil {
 		return client, err
 	}
-	esConfig, err := escfg.GenESConfig2(fileConfig, ctx)
+	esConfig, err := escfg.GenESConfig(fileConfig, ctx)
 	if err != nil {
 		return client, err
 	}
