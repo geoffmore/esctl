@@ -49,8 +49,9 @@ echo "New version: ${new_version}"
 #-i when I'm ready
 sed  -i "s/$old_version/$new_version/g" "${version_file}"
 
-## Make an empty commit "bump version to {new_version}"
-git commit --allow-empty -m "Bump version ${old_version} -> ${new_version}"
+# Stage updated version file, commit, and tag
+git add "${version_file}" && \
+git commit -m "Bump version ${old_version} -> ${new_version}" && \
 git tag "${new_version}"
 
 ## Bump version in go.mod?
