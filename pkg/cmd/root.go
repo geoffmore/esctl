@@ -5,6 +5,7 @@ import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/geoffmore/esctl/pkg/esauth"
 	"github.com/geoffmore/esctl/pkg/escfg"
+	"github.com/geoffmore/esctl/pkg/version"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -19,8 +20,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "esctl",
-	Short: "esctl is a utility able to interact with elasticsearch clusters",
+	Use:     "esctl",
+	Short:   "esctl is a utility able to interact with elasticsearch clusters",
+	Version: version.Version,
 }
 
 func init() {
