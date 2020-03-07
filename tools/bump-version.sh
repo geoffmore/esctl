@@ -52,7 +52,7 @@ sed  -i "s/$old_version/$new_version/g" "${version_file}"
 # Stage updated version file, commit, and tag
 git add "${version_file}" && \
 git commit -m "Bump version ${old_version} -> ${new_version}" && \
-git tag "${new_version}"
+git tag -am "Bump version ${old_version} -> ${new_version}" "${new_version}"
 
 ## Bump version in go.mod?
 # go get new tag
