@@ -133,10 +133,23 @@ type Users struct {
 
 // Authentication credentials
 type User struct {
-	Name     string `yaml:"name",omitempty`
-	Password string `yaml:"password",omitempty`
-	ApiKey   string `yaml:"api-key",omitempty`
-	Token    Token  `yaml:"token",omitempty`
+	Name        string    `yaml:"name",omitempty`
+	NameCmd     ConfigCmd `yaml:"name-cmd",omitempty`
+	Password    string    `yaml:"password",omitempty`
+	PasswordCmd ConfigCmd `yaml:"password-cmd",omitempty`
+	ApiKey      string    `yaml:"api-key",omitempty`
+	Token       Token     `yaml:"token",omitempty`
+}
+
+type ConfigCmd struct {
+	Command string   `yaml:"command",omitempty`
+	Env     []string `yaml:"env",omitempty`
+	Args    []string `yaml:"args",omitempty`
+}
+
+// Check if ConfigCmd is empty
+func (c ConfigCmd) IsEmpty() bool {
+	return (c.Command == "") && (len(c.Env) == 0) && (len(c.Args) == 0)
 }
 
 // Token used for authentication
