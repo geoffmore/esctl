@@ -6,9 +6,9 @@ Todo list for esctl-go
 - [x] Separate elastic functions into their own package
 - [x] Add CI for building packages
 - [x] Add common badges to README
-- [ ] Add ability to switch between elastic clusters
+- [x] Add ability to switch between elastic clusters
   * [x] Via command
-  * [ ] Via flag
+  * [x] Via flag
 - [ ] Add automatic documentation for command usage (https://godoc.org/github.com/spf13/cobra/doc)
 - [x] Make top level command `esctl` display avaiable subcommands if no
   arguments are present
@@ -35,7 +35,8 @@ Todo list for esctl-go
   - [x] Show Inactive Watchers
 - [x] Add support for output format flag
 - [ ] Mock [Cluster](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html) apis
-- [ ] Improve error handling to be more verbose
+- [x] Improve error handling to be more verbose (somewhat complete, needs
+  improvement)
 - [x] Add API module to make requests in VERB ENDPOINT form to support not yet implemented endpoints
    * [x] MVP
    * [x] Support for output format flag and other existing flags
@@ -45,6 +46,23 @@ Todo list for esctl-go
    * [x] ~~Move api subcommand under escmd.~~ It shouldn't be considered an
      extension/option. Every subcommand should probably have its own package.
      Keeping the current structure
+- [ ] Mock functions from [kubectl
+  config](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#config)
+   * [x] current-context
+   * [ ] delete-cluster
+   * [ ] delete-context
+   * [ ] get-clusters
+   * [x] get-contexts
+   * [ ] rename-context
+   * [ ] set
+   * [ ] set-cluster
+   * [ ] set-context
+   * [ ] set-credentials
+   * [x] use-context
+   * [x] view (currently read)
+   * [x] generate
+   * [x] validate
+
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
 - [ ] escli_ls

@@ -169,7 +169,7 @@ func askPass() (str string, err error) {
 	return str, err
 }
 
-func GenESConfig(cfg Config, ctx string) (es7cfg elastic7.Config, err error) {
+func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, err error) {
 	// Order of operations
 	// --- Cluster ---
 	// Ordered by completeness of information
@@ -287,13 +287,19 @@ func GenESConfig(cfg Config, ctx string) (es7cfg elastic7.Config, err error) {
 	}
 
 	// Debug connection stuff. Should be wrapped in a feature flag
-	var debug bool = false
+	// There are a lot of debugging options. This will likely need to be extended
+	// in the future.
+	// https://godoc.org/github.com/elastic/go-elasticsearch/estransport#ColorLogger
 	if debug {
 		es7cfg.Logger = &estransport.ColorLogger{
-			Output:             os.Stdout,
-			EnableRequestBody:  true,
-			EnableResponseBody: true,
+			Output:            os.Stdout,
+			EnableRequestBody: true,
+			// Response body is not needed since that is already returned via
+			// esutil
+			EnableResponseBody: false,
 		}
+		es7cfg.EnableMetrics = true
+		es7cfg.EnableDebugLogger = true
 	}
 
 	return es7cfg, err
