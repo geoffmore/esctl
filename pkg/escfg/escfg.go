@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 )
 
 // Read a file into bytes
@@ -160,6 +161,78 @@ func IsValidCfg(b []byte) bool {
 
 }
 
+func pathOf(cmd string) (path string, isInPath bool) {
+	path, err := exec.LookPath(cmd)
+	if err == nil {
+		isInPath = true
+	}
+	return path, isInPath
+}
+
+func getCmd(cfgCmd ConfigCmd) (str string, err error) {
+	var inPath bool
+	// https://stackoverflow.com/questions/28447297
+	if cfgCmd.IsEmpty() {
+		err = fmt.Errorf("ConfigCmd struct is empty")
+		return str, err
+	}
+
+	path, inPath := pathOf(cfgCmd.Command)
+	if !inPath {
+		err = fmt.Errorf("Command not found")
+		return str, err
+	}
+	command := exec.Cmd{
+		Path: path,
+		Args: cfgCmd.Args,
+		Env:  cfgCmd.Env,
+	}
+
+	// This part needs testing to ensure only STDOUT is returned
+	b, err := command.Output()
+	if err != nil {
+		// This line should not be in this function
+		fmt.Printf("Unable to execute command. Falling back to static field if possible...")
+		return str, err
+	}
+	return string(b), nil
+
+}
+func getUser(user User) (str string, err error) {
+	// Try user.NameCmd first
+	name, err := getCmd(user.NameCmd)
+	if err != nil {
+		// Then try user.Name
+		if user.Name == "" {
+			// Finally, prompt
+			name, err = askPass()
+			if err != nil {
+				return str, err
+			}
+		} else {
+			name = user.Name
+		}
+	}
+	return name, nil
+}
+func getPass(user User) (str string, err error) {
+	// Try user.PassCmd first
+	pass, err := getCmd(user.PasswordCmd)
+	if err != nil {
+		// Then try user.Password
+		if user.Password == "" {
+			// Finally, prompt
+			pass, err = askPass()
+			if err != nil {
+				return str, err
+			}
+		} else {
+			pass = user.Password
+		}
+	}
+	return pass, nil
+}
+
 // Prompt for password to authenticate a request
 func askPass() (str string, err error) {
 	fmt.Printf("Enter your password to connect as user: ")
@@ -229,10 +302,11 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 			currentUser = user.User
 		}
 	}
-	if currentUser == (User{}) {
-		err = fmt.Errorf("User %s not found", currentUserName)
-		return es7cfg, err
-	}
+	// Ignoring this check for now
+	//if currentUser == (User{}) {
+	//	err = fmt.Errorf("User %s not found", currentUserName)
+	//	return es7cfg, err
+	//}
 
 	// Get a cluster struct to work with
 	currentClusterName = currentContext.Cluster
@@ -259,22 +333,64 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 		err = fmt.Errorf("Neither CloudID nor ElasticAddresses field populated. Unable to generate es7cfg.")
 		return es7cfg, err
 	}
+	// Old
+	// Create user information
+	//if currentUser.ApiKey != "" {
+	//	es7cfg.APIKey = currentUser.ApiKey
+	//} else if currentUser.Name != "" && currentUser.Password != "" {
+	//	es7cfg.Username = currentUser.Name
+	//	es7cfg.Password = currentUser.Password
+	//} else if currentUser.Name != "" {
+	//	es7cfg.Username = currentUser.Name
+	//	pass, err := askPass()
+	//	if err != nil {
+	//		return es7cfg, err
+	//	}
+	//	es7cfg.Password = pass
+	//} else {
+	//	err = fmt.Errorf("None of token, apikey, name + password, or name provided.\n Unable to generate config")
+	//	return es7cfg, err
+	//}
 
+	var completeCreds bool
+	// ApiKey
+	// NameCmd or Name
+	// getName(ConfigCmd) (string, error) and getPass(ConfigCmd) (string, error) functs?
+	// PasswordCmd or Password
+	// Error
+	// New
 	// Create user information
 	if currentUser.ApiKey != "" {
 		es7cfg.APIKey = currentUser.ApiKey
-	} else if currentUser.Name != "" && currentUser.Password != "" {
-		es7cfg.Username = currentUser.Name
-		es7cfg.Password = currentUser.Password
-	} else if currentUser.Name != "" {
-		es7cfg.Username = currentUser.Name
-		pass, err := askPass()
-		if err != nil {
-			return es7cfg, err
+		completeCreds = true
+	}
+	if !completeCreds {
+		es7cfg.Username, err = getUser(currentUser)
+		es7cfg.Password, err = getPass(currentUser)
+		if err == nil {
+			completeCreds = true
 		}
-		es7cfg.Password = pass
-	} else {
-		err = fmt.Errorf("None of token, apikey, name + password, or name provided.\n Unable to generate config")
+	}
+
+	//else if currentUser.Name != "" && currentUser.Password != "" {
+	//	es7cfg.Username = currentUser.Name
+	//	es7cfg.Password = currentUser.Password
+	//}
+
+	//else if currentUser.Name != "" {
+	//	es7cfg.Username = currentUser.Name
+	//	pass, err := askPass()
+	//	if err != nil {
+	//		return es7cfg, err
+	//	}
+	//	es7cfg.Password = pass
+	//} else {
+	//	err = fmt.Errorf("None of token, apikey, name + password, or name provided.\n Unable to generate config")
+	//	return es7cfg, err
+	//}
+
+	if !completeCreds {
+		err = fmt.Errorf("No complete credential set provided")
 		return es7cfg, err
 	}
 
@@ -286,7 +402,6 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 		es7cfg.Transport = transport
 	}
 
-	// Debug connection stuff. Should be wrapped in a feature flag
 	// There are a lot of debugging options. This will likely need to be extended
 	// in the future.
 	// https://godoc.org/github.com/elastic/go-elasticsearch/estransport#ColorLogger
