@@ -14,6 +14,11 @@ import (
 	"os/exec"
 )
 
+var (
+	namePrompt     string = "Please enter your username: "
+	passwordPrompt string = "Please enter your password"
+)
+
 // Read a file into bytes
 func ToBytes(file string) (b []byte, err error) {
 	b, err = ioutil.ReadFile(file)
@@ -161,6 +166,7 @@ func IsValidCfg(b []byte) bool {
 
 }
 
+// Returns the full path of a command, if it is in $PATH
 func pathOf(cmd string) (path string, isInPath bool) {
 	path, err := exec.LookPath(cmd)
 	if err == nil {
@@ -169,76 +175,64 @@ func pathOf(cmd string) (path string, isInPath bool) {
 	return path, isInPath
 }
 
-func getCmd(cfgCmd ConfigCmd) (str string, err error) {
+func getCmd(cfgCmd ConfigCmd) (string, error) {
 	var inPath bool
+	var err error
+
 	// https://stackoverflow.com/questions/28447297
 	if cfgCmd.IsEmpty() {
 		err = fmt.Errorf("ConfigCmd struct is empty")
-		return str, err
+		return "", err
 	}
 
+	// Find full path of command
 	path, inPath := pathOf(cfgCmd.Command)
 	if !inPath {
 		err = fmt.Errorf("Command not found")
-		return str, err
-	}
-	command := exec.Cmd{
-		Path: path,
-		Args: cfgCmd.Args,
-		Env:  cfgCmd.Env,
+		return "", err
 	}
 
+	// Build exec.Command struct
+	command := exec.Command(path, cfgCmd.Args...)
+	command.Env = cfgCmd.Env
+
+	// Execute command and return output
 	// This part needs testing to ensure only STDOUT is returned
 	b, err := command.Output()
 	if err != nil {
 		// This line should not be in this function
-		fmt.Printf("Unable to execute command. Falling back to static field if possible...")
-		return str, err
+		fmt.Println("Unable to execute command. Falling back to static field if possible...")
+		return "", err
 	}
 	return string(b), nil
-
-}
-func getUser(user User) (str string, err error) {
-	// Try user.NameCmd first
-	name, err := getCmd(user.NameCmd)
-	if err != nil {
-		// Then try user.Name
-		if user.Name == "" {
-			// Finally, prompt
-			name, err = askPass()
-			if err != nil {
-				return str, err
-			}
-		} else {
-			name = user.Name
-		}
-	}
-	return name, nil
-}
-func getPass(user User) (str string, err error) {
-	// Try user.PassCmd first
-	pass, err := getCmd(user.PasswordCmd)
-	if err != nil {
-		// Then try user.Password
-		if user.Password == "" {
-			// Finally, prompt
-			pass, err = askPass()
-			if err != nil {
-				return str, err
-			}
-		} else {
-			pass = user.Password
-		}
-	}
-	return pass, nil
 }
 
-// Prompt for password to authenticate a request
-func askPass() (str string, err error) {
-	fmt.Printf("Enter your password to connect as user: ")
+// Generic wrapper around what was formerly getUser() and getPass()
+func getVal(cfg ConfigCmd, fieldVal string, text string) (string, error) {
+	// Try ConfigCmd value first
+	cfgVal, err := getCmd(cfg)
+	if err != nil {
+		// Then try value from static field
+		if fieldVal == "" {
+			// Finally, prompt
+			promptVal, err := prompt(text)
+			// An error check may not be needed here
+			if err != nil {
+				return "", err
+			}
+			return promptVal, nil
+		}
+		return fieldVal, nil
+	}
+	return cfgVal, nil
+}
+
+// Prompt for input. Replaces askPass()
+func prompt(text string) (str string, err error) {
+	fmt.Printf(text)
 	b, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	str = string(b)
-	fmt.Printf("\n\n")
+	fmt.Printf("\n")
 	return str, err
 }
 
@@ -341,8 +335,12 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 		completeCreds = true
 	}
 	if !completeCreds {
-		es7cfg.Username, err = getUser(currentUser)
-		es7cfg.Password, err = getPass(currentUser)
+		es7cfg.Username, err = getVal(currentUser.NameCmd, currentUser.Name, namePrompt)
+		es7cfg.Password, err = getVal(
+			currentUser.PasswordCmd,
+			currentUser.Password,
+			fmt.Sprintf("%s '%s': ", passwordPrompt, es7cfg.Username),
+		)
 		if err == nil {
 			completeCreds = true
 		}
