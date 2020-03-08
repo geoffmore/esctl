@@ -333,32 +333,8 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 		err = fmt.Errorf("Neither CloudID nor ElasticAddresses field populated. Unable to generate es7cfg.")
 		return es7cfg, err
 	}
-	// Old
-	// Create user information
-	//if currentUser.ApiKey != "" {
-	//	es7cfg.APIKey = currentUser.ApiKey
-	//} else if currentUser.Name != "" && currentUser.Password != "" {
-	//	es7cfg.Username = currentUser.Name
-	//	es7cfg.Password = currentUser.Password
-	//} else if currentUser.Name != "" {
-	//	es7cfg.Username = currentUser.Name
-	//	pass, err := askPass()
-	//	if err != nil {
-	//		return es7cfg, err
-	//	}
-	//	es7cfg.Password = pass
-	//} else {
-	//	err = fmt.Errorf("None of token, apikey, name + password, or name provided.\n Unable to generate config")
-	//	return es7cfg, err
-	//}
 
 	var completeCreds bool
-	// ApiKey
-	// NameCmd or Name
-	// getName(ConfigCmd) (string, error) and getPass(ConfigCmd) (string, error) functs?
-	// PasswordCmd or Password
-	// Error
-	// New
 	// Create user information
 	if currentUser.ApiKey != "" {
 		es7cfg.APIKey = currentUser.ApiKey
@@ -371,23 +347,6 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 			completeCreds = true
 		}
 	}
-
-	//else if currentUser.Name != "" && currentUser.Password != "" {
-	//	es7cfg.Username = currentUser.Name
-	//	es7cfg.Password = currentUser.Password
-	//}
-
-	//else if currentUser.Name != "" {
-	//	es7cfg.Username = currentUser.Name
-	//	pass, err := askPass()
-	//	if err != nil {
-	//		return es7cfg, err
-	//	}
-	//	es7cfg.Password = pass
-	//} else {
-	//	err = fmt.Errorf("None of token, apikey, name + password, or name provided.\n Unable to generate config")
-	//	return es7cfg, err
-	//}
 
 	if !completeCreds {
 		err = fmt.Errorf("No complete credential set provided")

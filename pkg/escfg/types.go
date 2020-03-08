@@ -81,16 +81,16 @@ type Config struct {
 	Clusters       []Cluster  `yaml:"clusters"`
 	Contexts       []Contexts `yaml:"contexts"`
 	Users          []Users    `yaml:"users"`
-	CurrentContext string     `yaml:"current-context",omitempty`
+	CurrentContext string     `yaml:"current-context,omitempty"`
 }
 
 // Connection details for a cluster
 type Cluster struct {
 	Name             string   `yaml:"name"`
-	ElasticAddresses []string `yaml:"elastic-addresses",omitempty`
+	ElasticAddresses []string `yaml:"elastic-addresses,omitempty"`
 	//KibanaAddresses  []string `yaml:"kibana-addresses",omitempty`
-	CloudID         string `yaml:"cloud-id",omitempty`
-	AllowSelfSigned string `yaml:"allowSelfSigned",omitempty`
+	CloudID         string `yaml:"cloud-id,omitempty"`
+	AllowSelfSigned string `yaml:"allowSelfSigned,omitempty"`
 }
 
 // Check if all fields in the Cluster struct have their nil value. Necessary
@@ -114,37 +114,38 @@ func (c Cluster) IsNil() bool {
 
 // Named Context
 type Contexts struct {
-	Name    string  `yaml:"name",omitempty`
-	Context Context `yaml:"context",omitempty`
+	Name    string  `yaml:"name,omitempty"`
+	Context Context `yaml:"context,omitempty"`
 }
 
 // A combination of a named Cluster and named User. Used for lookups of the
 // respective objects
 type Context struct {
-	Cluster string `yaml:"cluster",omitempty`
-	User    string `yaml:"user",omitempty`
+	Cluster string `yaml:"cluster,omitempty"`
+	User    string `yaml:"user,omitempty"`
 }
 
 // Named User
 type Users struct {
-	Name string `yaml:"name",omitempty`
-	User User   `yaml:"user",omitempty`
+	Name string `yaml:"name,omitempty"`
+	User User   `yaml:"user,omitempty"`
 }
 
 // Authentication credentials
 type User struct {
-	Name        string    `yaml:"name",omitempty`
-	NameCmd     ConfigCmd `yaml:"name-cmd",omitempty`
-	Password    string    `yaml:"password",omitempty`
-	PasswordCmd ConfigCmd `yaml:"password-cmd",omitempty`
-	ApiKey      string    `yaml:"api-key",omitempty`
-	Token       Token     `yaml:"token",omitempty`
+	Name        string    `yaml:"name,omitempty"`
+	NameCmd     ConfigCmd `yaml:"name-cmd,omitempty"`
+	Password    string    `yaml:"password,omitempty"`
+	PasswordCmd ConfigCmd `yaml:"password-cmd,omitempty"`
+	ApiKey      string    `yaml:"api-key,omitempty"`
+	Token       Token     `yaml:"token,omitempty"`
 }
 
 type ConfigCmd struct {
-	Command string   `yaml:"command",omitempty`
-	Env     []string `yaml:"env",omitempty`
-	Args    []string `yaml:"args",omitempty`
+	// A ConfigCmd should at least have a Command
+	Command string   `yaml:"command"`
+	Env     []string `yaml:"env,omitempty"`
+	Args    []string `yaml:"args,omitempty"`
 }
 
 // Check if ConfigCmd is empty
@@ -154,6 +155,6 @@ func (c ConfigCmd) IsEmpty() bool {
 
 // Token used for authentication
 type Token struct {
-	Value      string `yaml:"value",omitempty`
-	Expiration string `yaml:"expiration",omitempty`
+	Value      string `yaml:"value,omitempty"`
+	Expiration string `yaml:"expiration,omitempty"`
 }
