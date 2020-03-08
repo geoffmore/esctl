@@ -17,6 +17,10 @@ var (
 	// Used for flags
 	outputFmt string
 	context   string
+	// What is the philosophical difference between debug and verbose?
+	// For now, debug stays and verbose does not
+	debug bool
+	// verbose bool
 )
 
 var rootCmd = &cobra.Command{
@@ -28,6 +32,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFmt, "output", "o", "", "choice of output format")
 	rootCmd.PersistentFlags().StringVarP(&context, "context", "c", "", "choice of context to use for a command")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "debug connection")
 
 }
 
@@ -48,7 +53,7 @@ func genClient(ctx string) (client *elastic7.Client, err error) {
 	if err != nil {
 		return client, err
 	}
-	esConfig, err := escfg.GenESConfig(fileConfig, ctx)
+	esConfig, err := escfg.GenESConfig(fileConfig, ctx, debug)
 	if err != nil {
 		return client, err
 	}
