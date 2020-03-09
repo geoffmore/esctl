@@ -62,6 +62,8 @@ Todo list for esctl-go
    * [x] view (currently read)
    * [x] generate
    * [x] validate
+- [x] add ability to execute artibrary commands rather than store
+  username/password in config file
 
 
 ## Function porting from https://github.com/slmingol/escli/blob/master/es_funcs.bash
