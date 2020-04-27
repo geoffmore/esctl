@@ -339,7 +339,7 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 		es7cfg.Password, err = getVal(
 			currentUser.PasswordCmd,
 			currentUser.Password,
-			fmt.Sprintf("%s '%s': ", passwordPrompt, es7cfg.Username),
+			fmt.Sprintf("%s for user '%s': ", passwordPrompt, es7cfg.Username),
 		)
 		if err == nil {
 			completeCreds = true
