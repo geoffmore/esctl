@@ -20,7 +20,7 @@ var (
 	// What is the philosophical difference between debug and verbose?
 	// For now, debug stays and verbose does not
 	debug bool
-	help  bool
+	//help  bool
 	// verbose bool
 )
 
@@ -34,7 +34,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFmt, "output", "o", "", "choice of output format")
 	rootCmd.PersistentFlags().StringVarP(&context, "context", "c", "", "choice of context to use for a command")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "debug connection")
-	rootCmd.PersistentFlags().BoolVarP(&help, "help", "", false, "help for a command where available (Elasticsearch side)")
+	// --help is an internal flag to cobra. Maybe esHelp is a better flag?
+	//rootCmd.PersistentFlags().BoolVarP(&help, "help", "", false, "help for a command where available (Elasticsearch side)")
 
 }
 
