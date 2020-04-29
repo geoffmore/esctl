@@ -20,6 +20,7 @@ func init() {
 	adminCmd.AddCommand(listNodesStorage)
 	adminCmd.AddCommand(showBigShards)
 	adminCmd.AddCommand(showSmallShards)
+	adminCmd.AddCommand(showShardUsageByNode)
 	//adminCmd.AddCommand(helpCmd)
 	//helpCmd.AddCommand(helpCat)
 	//helpCat.AddCommand(helpCatIndices)
@@ -134,6 +135,24 @@ var showSmallShards = &cobra.Command{
 		// in Run
 		i, _ := strconv.Atoi(args[0])
 		err = admin.ShowSmallShards(client, outputFmt, help, i)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
+}
+
+var showShardUsageByNode = &cobra.Command{
+	// esctl admin show-shard-usage-by-node
+	Use:   "show-shard-usage-by-node",
+	Short: "No description",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Boilerplate
+		client, err := genClient(context)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = admin.ShowShardUsageByNode(client, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}

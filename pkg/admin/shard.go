@@ -103,7 +103,7 @@ func ShowBigShards(esClient *elastic7.Client, outputFmt string, help bool, shard
 func ShowSmallShards(esClient *elastic7.Client, outputFmt string, help bool, shardsPerNode int) error {
 
 	// Array is sorted server-side, so logic is simplified here
-	var sortArray []string = []string{"store:asc,index,shard"}
+	var sortArray []string = []string{"node:desc,store:asc"}
 
 	var verbose bool = true
 
@@ -155,6 +155,72 @@ func ShowSmallShards(esClient *elastic7.Client, outputFmt string, help bool, sha
 	b1, err := json.Marshal(dataMap)
 	err = esutil.ParseBytes(b1, false, outputFmt)
 	return err
+}
+
+func ShowShardUsageByNode(esClient *elastic7.Client, outputFmt string) error {
+
+	// _cat/shards?v&human&pretty&s=store:desc,index,shard
+	// /_cat/shards?format=json&h=node,state
+	// Array is sorted server-side, so logic is simplified here
+	// I am overthinking this. Start with expected output and work backwords from
+	// there
+
+	//node                 #shards
+	//----                 -------
+	//1
+	//instance-0000000000  13
+
+	var sortArray []string = []string{"node:desc"}
+	var fieldArray []string = []string{"node", "state"}
+
+	req := esapi.CatShardsRequest{
+		// Compact for performance
+		Human:  false,
+		Pretty: false,
+
+		H: fieldArray,
+		S: sortArray,
+	}
+
+	//changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), "json")
+	_ = esutil.SetFormat(reflect.ValueOf(&req).Elem(), "json")
+
+	type Response struct {
+		Node  string `json:"node"`
+		State string `json:"state"`
+	}
+
+	// https://stackoverflow.com/questions/8442989
+	jsonData := make([]Response, 100)
+
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+
+	// Marshal json into variable
+	err = json.Unmarshal(b, &jsonData)
+	if err != nil {
+		return err
+	}
+
+	dataMap := make(map[string]int)
+
+	for _, v := range jsonData {
+		// If state is unassigned, node is null in json. This is easier to handle
+		if v.State == "UNASSIGNED" {
+			dataMap["UNASSIGNED"] += 1
+		} else {
+			dataMap[v.Node] += 1
+		}
+
+	}
+
+	b1, err := json.Marshal(dataMap)
+	err = esutil.ParseBytes(b1, false, outputFmt)
+	return err
+
 }
 
 // Shared routine for ShowBigShards and ShowSmallShards
