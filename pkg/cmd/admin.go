@@ -13,6 +13,9 @@ import (
 
 func init() {
 	rootCmd.AddCommand(adminCmd)
+	//adminCmd.AddCommand(cordon)
+	//adminCmd.AddCommand(drain)
+	adminCmd.AddCommand(uncordon)
 	//adminCmd.AddCommand(adminTest)
 	//adminCmd.AddCommand(adminInt)
 	// Help gets its own subcommand because it probably makes sense
@@ -32,6 +35,67 @@ var adminCmd = &cobra.Command{
 	// esctl admin
 	Use:   "admin",
 	Short: "No description",
+}
+
+//var cordon = &cobra.Command{
+//	// esctl admin list-nodes
+//	Use:   "cordon",
+//	Short: "No description",
+//	Run: func(cmd *cobra.Command, args []string) {
+//		// Boilerplate
+//		client, err := genClient(context)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//
+//		err = admin.Cordon(client, outputFmt, help)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//	},
+//}
+
+var uncordon = &cobra.Command{
+	// esctl admin list-nodes
+	Use:   "uncordon",
+	Short: "removed a node from exclusions list based on its name and ip",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return errors.New("requires a string argument")
+		}
+		return nil
+	},
+
+	Run: func(cmd *cobra.Command, args []string) {
+		// Boilerplate
+		client, err := genClient(context)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = admin.Uncordon(client, outputFmt, help, args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
+}
+
+var drain = &cobra.Command{
+	// esctl admin list-nodes
+	Use:   "drain",
+	Short: "No description",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Boilerplate
+		client, err := genClient(context)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = admin.Drain(client, outputFmt, help, args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
 }
 
 var listNodes = &cobra.Command{
