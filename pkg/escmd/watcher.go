@@ -1,6 +1,7 @@
 package escmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -238,23 +239,61 @@ func WatcherServiceStart(esClient *elastic7.Client) error {
 	return nil
 }
 
+// key-containing struct necessary for WatcherListRes struct
+type WatcherHits struct {
+	ID string `json:"_id"`
+}
+
+// Expected response for WatcherList function
+type WatcherListRes struct {
+	Hits struct {
+		Total struct {
+			Value    int    `json:"value"`
+			Relation string `json:"relation"`
+		} `json:"total"`
+		Hits []WatcherHits `json:"hits"`
+	} `json:"hits"`
+}
+
+// Request body to WatcherList function
+type WatcherListReq struct {
+	Size int `json:"size"`
+}
+
+// Output format for WatcherList function
+type WatcherListOutput struct {
+	Watchers []string `json:"watchers" yaml:"watchers"`
+}
+
+// Get an exact count of watchers (hits) in the .watches index
+func getWatcherCount(esClient *elastic7.Client) (int, error) { return 0, nil }
+
+// List watchers present on the cluster
 func WatcherList(esClient *elastic7.Client, outputFmt string) error {
+
+	var body WatcherListReq
+
+	// Create the request with a large inital size
+	var initSize int = 1000
+	body = WatcherListReq{Size: initSize}
+
+	b, err := json.Marshal(body)
+	r := bytes.NewReader(b)
+	// Replace with below
+	//r, err := esutil.JSONToBody(body)
+	//r, err := esutil.JSONToReader(body)
+
 	req := esapi.SearchRequest{
-		Human:  true,
-		Pretty: true,
+		Human:  false,
+		Pretty: false,
+		Body:   r,
 
 		Index:      []string{".watches"},
-		FilterPath: []string{"hits.hits._id"},
+		FilterPath: []string{"hits.hits._id", "hits.total"},
 	}
 
-	// Expected output format for this specific query
-	var output struct {
-		Hits struct {
-			Hits []struct {
-				ID string `json:"_id"`
-			} `json:"hits"`
-		} `json:"hits"`
-	}
+	// Expected output format for this query
+	var output WatcherListRes
 
 	// escmd.request doesn't work here because we need data manipulation
 	//err := request(req, esClient)
@@ -266,7 +305,7 @@ func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 	}
 
 	// Read response body
-	b, err := ioutil.ReadAll(res.Body)
+	b, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
@@ -283,47 +322,35 @@ func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 		return err
 	}
 
-	// Only include the necessary stuff. List comprehension would be great here
-	// Refactor into its own function
-	// Cluster created watchers
-	systemWatchers := make([]string, 0)
-	// User created watchers
-	userWatchers := make([]string, 0)
-	var fc string
-
-	for _, watcher := range output.Hits.Hits {
-		fc = string(watcher.ID[0])
-		if fc == "-" {
-			systemWatchers = append(systemWatchers, watcher.ID)
-		} else {
-			userWatchers = append(userWatchers, watcher.ID)
+	var watcherSize int
+	// Get the exact count if the returned size is larger than the
+	//preallocated size
+	if !(initSize > output.Hits.Total.Value && output.Hits.Total.Relation != "gt") {
+		watcherSize, err = getWatcherCount(esClient)
+		if err != nil {
+			return err
 		}
+	} else {
+		// Discard initSize in favor of the actual count
+		watcherSize = output.Hits.Total.Value
 	}
+	watchers := make([]string, watcherSize)
+
+	for i, watcher := range output.Hits.Hits {
+		watchers[i] = watcher.ID
+	}
+
+	watcherList := WatcherListOutput{Watchers: watchers}
 
 	// Temporary until output format feature is added
 	var format string = "json"
+	//var format string = "yaml"
 
 	if format == "json" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `json:"user"`
-				System []string `json:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = json.MarshalIndent(watchers, "", "  ")
+		b, err = json.MarshalIndent(watcherList, "", "  ")
 	}
 	if format == "yaml" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `yaml:"user"`
-				System []string `yaml:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = yaml.Marshal(watchers)
+		b, err = yaml.Marshal(watcherList)
 	}
 	if err != nil {
 		return err
@@ -392,7 +419,6 @@ func reduceWatchersTo(esClient *elastic7.Client, desiredState bool) (watchers []
 
 }
 
-//
 func WatcherShowActive(esClient *elastic7.Client, outputFmt string) error {
 	var watcherDesiredState bool = true
 
