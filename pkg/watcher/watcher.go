@@ -1,4 +1,4 @@
-package escmd
+package watcher
 
 import (
 	"context"
