@@ -1,6 +1,7 @@
 package esutil
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -170,4 +171,10 @@ func Find(slice []string, val string) (int, bool) {
 		}
 	}
 	return -1, false
+}
+
+// Take json. Return a reader
+func JSONToReader(intf interface{}) (*bytes.Reader, error) {
+	b, err := json.Marshal(intf)
+	return bytes.NewReader(b), err
 }

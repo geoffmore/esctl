@@ -1,7 +1,6 @@
 package escmd
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -239,6 +238,34 @@ func WatcherServiceStart(esClient *elastic7.Client) error {
 	return nil
 }
 
+type GetWatcherCountStruct struct {
+	Count int `json:"count"`
+}
+
+// Get an exact count of watchers (hits) in the .watches index
+func getWatcherCount(esClient *elastic7.Client) (int, error) {
+
+	req := esapi.CountRequest{
+		Human:  false,
+		Pretty: false,
+		Index:  []string{".watches"},
+	}
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return -1, err
+
+	}
+
+	var output GetWatcherCountStruct
+
+	err = json.Unmarshal(b, &output)
+	if err != nil {
+		return -1, err
+	}
+
+	return output.Count, nil
+}
+
 // key-containing struct necessary for WatcherListRes struct
 type WatcherHits struct {
 	ID string `json:"_id"`
@@ -265,29 +292,23 @@ type WatcherListOutput struct {
 	Watchers []string `json:"watchers" yaml:"watchers"`
 }
 
-// Get an exact count of watchers (hits) in the .watches index
-func getWatcherCount(esClient *elastic7.Client) (int, error) { return 0, nil }
-
 // List watchers present on the cluster
 func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 
-	var body WatcherListReq
-
 	// Create the request with a large inital size
 	var initSize int = 1000
-	body = WatcherListReq{Size: initSize}
-
-	b, err := json.Marshal(body)
-	r := bytes.NewReader(b)
-	// Replace with below
-	//r, err := esutil.JSONToBody(body)
-	//r, err := esutil.JSONToReader(body)
+	r, err := esutil.JSONToReader(
+		WatcherListReq{Size: initSize},
+	)
+	if err != nil {
+		// JSON Marshalling error
+		return err
+	}
 
 	req := esapi.SearchRequest{
-		Human:  false,
-		Pretty: false,
-		Body:   r,
-
+		Human:      false,
+		Pretty:     false,
+		Body:       r,
 		Index:      []string{".watches"},
 		FilterPath: []string{"hits.hits._id", "hits.total"},
 	}
@@ -295,26 +316,7 @@ func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 	// Expected output format for this query
 	var output WatcherListRes
 
-	// escmd.request doesn't work here because we need data manipulation
-	//err := request(req, esClient)
-
-	// Error in request execution
-	res, resErr := req.Do(context.Background(), esClient.Transport)
-	if resErr != nil {
-		return resErr
-	}
-
-	// Read response body
-	b, err = ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	// Error in http response
-	if res.StatusCode != 200 {
-		return fmt.Errorf("Status Code is %v rather than 200.\n Printed error is: \n%v\n. Exiting...\n", res.StatusCode, string(b))
-	}
+	b, err := esutil.RequestNew(req, esClient)
 
 	// Make sense of the bytes
 	err = json.Unmarshal(b, &output)
@@ -323,6 +325,7 @@ func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 	}
 
 	var watcherSize int
+
 	// Get the exact count if the returned size is larger than the
 	//preallocated size
 	if !(initSize > output.Hits.Total.Value && output.Hits.Total.Relation != "gt") {
@@ -342,15 +345,13 @@ func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 
 	watcherList := WatcherListOutput{Watchers: watchers}
 
-	// Temporary until output format feature is added
-	var format string = "json"
-	//var format string = "yaml"
-
-	if format == "json" {
-		b, err = json.MarshalIndent(watcherList, "", "  ")
-	}
-	if format == "yaml" {
+	// Only supported output formats here are yaml and json
+	// support for tabular should come from esutil once ParseBytes or similar can
+	// accept a well-defined struct
+	if outputFmt == "yaml" {
 		b, err = yaml.Marshal(watcherList)
+	} else {
+		b, err = json.MarshalIndent(watcherList, "", "  ")
 	}
 	if err != nil {
 		return err
