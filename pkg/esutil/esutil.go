@@ -71,8 +71,10 @@ func Request(r esRequest, c *elastic7.Client) error {
 	if err != nil {
 		return err
 	}
-	if res.StatusCode != 200 {
-		return fmt.Errorf("Status Code is %v rather than 200. Exiting...\n", res.StatusCode)
+
+	// Check if status code is successful
+	if !(res.StatusCode >= 200 && res.StatusCode < 300) {
+		return fmt.Errorf("Status Code '%v' not in range 200-299. Exiting...\n", res.StatusCode)
 	}
 
 	b, err := ioutil.ReadAll(res.Body)
@@ -122,8 +124,9 @@ func RequestNew(r esRequest, c *elastic7.Client) ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
-	if res.StatusCode != 200 {
-		return b, fmt.Errorf("Status Code is %v rather than 200. Exiting...\n", res.StatusCode)
+	// Check if status code is successful
+	if !(res.StatusCode >= 200 && res.StatusCode < 300) {
+		return b, fmt.Errorf("Status Code '%v' not in range 200-299. Exiting...\n", res.StatusCode)
 	}
 
 	b, err = ioutil.ReadAll(res.Body)
@@ -177,4 +180,24 @@ func Find(slice []string, val string) (int, bool) {
 func JSONToReader(intf interface{}) (*bytes.Reader, error) {
 	b, err := json.Marshal(intf)
 	return bytes.NewReader(b), err
+}
+
+func FilenameToReader(name string) (*bytes.Reader, error) {
+
+	var r *bytes.Reader
+
+	// Handle stdin
+	if name == "-" {
+		return r, fmt.Errorf("Reading from stdin is not yet supported")
+	} else {
+		// Open the file and read its contents
+		b, err := ioutil.ReadFile(name)
+		if err != nil {
+			return r, err
+		}
+		// Create a *io.Reader from bytes
+		r = bytes.NewReader(b)
+	}
+
+	return r, nil
 }

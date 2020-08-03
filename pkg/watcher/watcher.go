@@ -8,6 +8,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl/pkg/esutil"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"reflect"
 )
@@ -16,16 +17,32 @@ import (
 // 'pods_pending' is valid
 // '-pods_pending' is interpreted as having a flag and does not work
 
-func WatcherPut(esClient *elastic7.Client, watch string) error {
-	//req := esapi.WatcherPutWatchRequest{
-	//	Format: "json",
-	//	Pretty: true,
-	//}
+// Having a default value that can be empty causes weird behaviour sometimes
 
-	// -f for file or -stdin for standard in
-	//err := request(req, esClient)
-	fmt.Println("not yet implemented")
-	return nil
+func WatcherPut(esClient *elastic7.Client, watch string, r io.Reader, initInactive bool, outputFmt string) error {
+
+	var active bool
+	// This flip isn't ideal, but necessary
+	active = !initInactive
+
+	req := esapi.WatcherPutWatchRequest{
+		WatchID: watch,
+		Body:    r,
+		Active:  &active,
+
+		Pretty: true,
+		Human:  true,
+	}
+
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
+	return err
 }
 
 func WatcherGet(esClient *elastic7.Client, watch string, outputFmt string) error {

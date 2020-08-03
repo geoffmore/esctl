@@ -2,14 +2,23 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/geoffmore/esctl/pkg/esutil"
 	"github.com/geoffmore/esctl/pkg/watcher"
 	"github.com/spf13/cobra"
 	"log"
 )
 
+var initInactive bool
+
 func init() {
 	rootCmd.AddCommand(watcherCmd)
+
 	watcherCmd.AddCommand(watcherPut)
+
+	watcherPut.Flags().StringP("input-file", "f", "", "path to file. Use '-' to specify stdin")
+	watcherPut.Flags().BoolVarP(&initInactive, "inactive", "", false, "controls whether or not a watcher is initialized as inactive (default active)")
+	watcherPut.MarkFlagRequired("input-file")
+
 	watcherCmd.AddCommand(watcherGet)
 	watcherCmd.AddCommand(watcherDelete)
 	watcherCmd.AddCommand(watcherExecute)
@@ -34,20 +43,26 @@ var watcherCmd = &cobra.Command{
 var watcherPut = &cobra.Command{
 	Use:   "put",
 	Short: "PUT /_watcher/watch/<watch_id>",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Argument check
-		if len(args) != 1 {
-			errMsg := fmt.Sprintf("Invalid length of arguments. Expecting 1. Got %d\n", len(args))
-			log.Fatal("%s\n", errMsg)
-		}
 		// Boilerplate
 		client, err := genClient(context)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		//err = watcher.WatcherPut(client)
-		err = watcher.WatcherPut(client, args[0])
+		// Get the file name
+		inputFile, err := cmd.Flags().GetString("input-file")
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Generate a reader
+		r, err := esutil.FilenameToReader(inputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = watcher.WatcherPut(client, args[0], r, initInactive, outputFmt)
 		if err != nil {
 			log.Fatal(err)
 		}

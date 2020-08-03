@@ -11,6 +11,7 @@ import (
 )
 
 // file defined within the package scope for reusability
+// Config file path
 var file string = os.Expand(escfg.DefaultElasticConfig, os.Getenv)
 
 var (
@@ -34,6 +35,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&context, "context", "c", "", "choice of context to use for a command")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "debug connection")
 
+	// Note: Non-persistent flags do not appear to be inheritable
+	// See https://github.com/spf13/cobra/issues/747 for context on
+	// flag inheritance
 }
 
 // Main function of cobra
