@@ -1,4 +1,4 @@
-package escmd
+package watcher
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl/pkg/esutil"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"reflect"
 )
@@ -16,16 +17,32 @@ import (
 // 'pods_pending' is valid
 // '-pods_pending' is interpreted as having a flag and does not work
 
-func WatcherPut(esClient *elastic7.Client, watch string) error {
-	//req := esapi.WatcherPutWatchRequest{
-	//	Format: "json",
-	//	Pretty: true,
-	//}
+// Having a default value that can be empty causes weird behaviour sometimes
 
-	// -f for file or -stdin for standard in
-	//err := request(req, esClient)
-	fmt.Println("not yet implemented")
-	return nil
+func WatcherPut(esClient *elastic7.Client, watch string, r io.Reader, initInactive bool, outputFmt string) error {
+
+	var active bool
+	// This flip isn't ideal, but necessary
+	active = !initInactive
+
+	req := esapi.WatcherPutWatchRequest{
+		WatchID: watch,
+		Body:    r,
+		Active:  &active,
+
+		Pretty: true,
+		Human:  true,
+	}
+
+	// Boilerplate
+	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedField, outputFmt)
+	return err
 }
 
 func WatcherGet(esClient *elastic7.Client, watch string, outputFmt string) error {
@@ -238,44 +255,85 @@ func WatcherServiceStart(esClient *elastic7.Client) error {
 	return nil
 }
 
-func WatcherList(esClient *elastic7.Client, outputFmt string) error {
-	req := esapi.SearchRequest{
-		Human:  true,
-		Pretty: true,
+type GetWatcherCountStruct struct {
+	Count int `json:"count"`
+}
 
-		Index:      []string{".watches"},
-		FilterPath: []string{"hits.hits._id"},
+// Get an exact count of watchers (hits) in the .watches index
+func getWatcherCount(esClient *elastic7.Client) (int, error) {
+
+	req := esapi.CountRequest{
+		Human:  false,
+		Pretty: false,
+		Index:  []string{".watches"},
 	}
-
-	// Expected output format for this specific query
-	var output struct {
-		Hits struct {
-			Hits []struct {
-				ID string `json:"_id"`
-			} `json:"hits"`
-		} `json:"hits"`
-	}
-
-	// escmd.request doesn't work here because we need data manipulation
-	//err := request(req, esClient)
-
-	// Error in request execution
-	res, resErr := req.Do(context.Background(), esClient.Transport)
-	if resErr != nil {
-		return resErr
-	}
-
-	// Read response body
-	b, err := ioutil.ReadAll(res.Body)
+	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
+		return -1, err
+
+	}
+
+	var output GetWatcherCountStruct
+
+	err = json.Unmarshal(b, &output)
+	if err != nil {
+		return -1, err
+	}
+
+	return output.Count, nil
+}
+
+// key-containing struct necessary for WatcherListRes struct
+type WatcherHits struct {
+	ID string `json:"_id"`
+}
+
+// Expected response for WatcherList function
+type WatcherListRes struct {
+	Hits struct {
+		Total struct {
+			Value    int    `json:"value"`
+			Relation string `json:"relation"`
+		} `json:"total"`
+		Hits []WatcherHits `json:"hits"`
+	} `json:"hits"`
+}
+
+// Request body to WatcherList function
+type WatcherListReq struct {
+	Size int `json:"size"`
+}
+
+// Output format for WatcherList function
+type WatcherListOutput struct {
+	Watchers []string `json:"watchers" yaml:"watchers"`
+}
+
+// List watchers present on the cluster
+func WatcherList(esClient *elastic7.Client, outputFmt string) error {
+
+	// Create the request with a large inital size
+	var initSize int = 1000
+	r, err := esutil.JSONToReader(
+		WatcherListReq{Size: initSize},
+	)
+	if err != nil {
+		// JSON Marshalling error
 		return err
 	}
-	defer res.Body.Close()
 
-	// Error in http response
-	if res.StatusCode != 200 {
-		return fmt.Errorf("Status Code is %v rather than 200.\n Printed error is: \n%v\n. Exiting...\n", res.StatusCode, string(b))
+	req := esapi.SearchRequest{
+		Human:      false,
+		Pretty:     false,
+		Body:       r,
+		Index:      []string{".watches"},
+		FilterPath: []string{"hits.hits._id", "hits.total"},
 	}
+
+	// Expected output format for this query
+	var output WatcherListRes
+
+	b, err := esutil.RequestNew(req, esClient)
 
 	// Make sense of the bytes
 	err = json.Unmarshal(b, &output)
@@ -283,54 +341,44 @@ func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 		return err
 	}
 
-	// Only include the necessary stuff. List comprehension would be great here
-	// Refactor into its own function
-	// Cluster created watchers
-	systemWatchers := make([]string, 0)
-	// User created watchers
-	userWatchers := make([]string, 0)
-	var fc string
+	var watcherSize int
 
-	for _, watcher := range output.Hits.Hits {
-		fc = string(watcher.ID[0])
-		if fc == "-" {
-			systemWatchers = append(systemWatchers, watcher.ID)
-		} else {
-			userWatchers = append(userWatchers, watcher.ID)
+	// Get the exact count if the returned size is larger than the
+	//preallocated size
+	if !(initSize > output.Hits.Total.Value && output.Hits.Total.Relation != "gt") {
+		watcherSize, err = getWatcherCount(esClient)
+		if err != nil {
+			return err
 		}
+	} else {
+		// Discard initSize in favor of the actual count
+		watcherSize = output.Hits.Total.Value
+	}
+	watchers := make([]string, watcherSize)
+
+	for i, watcher := range output.Hits.Hits {
+		watchers[i] = watcher.ID
 	}
 
-	// Temporary until output format feature is added
-	var format string = "json"
+	watcherList := WatcherListOutput{Watchers: watchers}
 
-	if format == "json" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `json:"user"`
-				System []string `json:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = json.MarshalIndent(watchers, "", "  ")
-	}
-	if format == "yaml" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `yaml:"user"`
-				System []string `yaml:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = yaml.Marshal(watchers)
-	}
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
+	err = watcherList.display(outputFmt)
+	return err
+}
 
-	return nil
+type WatcherStateResponse struct {
+	Hits struct {
+		Hits []struct {
+			ID     string `json:"_id"`
+			Source struct {
+				Status struct {
+					State struct {
+						Active bool `json:"active"`
+					} `json:"state"`
+				} `json:"status"`
+			} `json:"_source"`
+		} `json:"hits"`
+	} `json:"hits"`
 }
 
 // GET /.watches/_search?filter_path=hits.hits._id,hits.hits._source.status.state.active
@@ -343,37 +391,11 @@ func reduceWatchersTo(esClient *elastic7.Client, desiredState bool) (watchers []
 		FilterPath: []string{"hits.hits._id", "hits.hits._source.status.state.active"},
 	}
 
-	var output struct {
-		Hits struct {
-			Hits []struct {
-				ID     string `json:"_id"`
-				Source struct {
-					Status struct {
-						State struct {
-							Active bool `json:"active"`
-						} `json:"state"`
-					} `json:"status"`
-				} `json:"_source"`
-			} `json:"hits"`
-		} `json:"hits"`
-	}
+	var output WatcherStateResponse
 
-	// Error in request execution
-	res, err := req.Do(context.Background(), esClient.Transport)
+	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
 		return []string{}, err
-	}
-
-	// Read response body
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return []string{}, err
-	}
-	defer res.Body.Close()
-
-	// Error in http response
-	if res.StatusCode != 200 {
-		return []string{}, fmt.Errorf("Status Code is %v rather than 200.\n Printed error is: \n%v\n. Exiting...\n", res.StatusCode, string(b))
 	}
 
 	// Make sense of the bytes
@@ -389,10 +411,23 @@ func reduceWatchersTo(esClient *elastic7.Client, desiredState bool) (watchers []
 	}
 
 	return watchers, nil
-
 }
 
-//
+func (w WatcherListOutput) display(outputFmt string) error {
+	var err error
+	var b []byte
+
+	switch outputFmt {
+	case "yaml":
+		b, err = yaml.Marshal(w)
+	default:
+		b, err = json.MarshalIndent(w, "", "  ")
+	}
+
+	fmt.Println(string(b))
+	return err
+}
+
 func WatcherShowActive(esClient *elastic7.Client, outputFmt string) error {
 	var watcherDesiredState bool = true
 
@@ -401,55 +436,10 @@ func WatcherShowActive(esClient *elastic7.Client, outputFmt string) error {
 		return err
 	}
 
-	// Only include the necessary stuff. List comprehension would be great here
-	// Refactor into its own function
-	// Cluster created watchers
-	systemWatchers := make([]string, 0)
-	// User created watchers
-	userWatchers := make([]string, 0)
-	var fc string
-	var b []byte
+	watcherList := WatcherListOutput{Watchers: watchers}
 
-	for _, watcher := range watchers {
-		fc = string(watcher[0])
-		if fc == "-" {
-			systemWatchers = append(systemWatchers, watcher)
-		} else {
-			userWatchers = append(userWatchers, watcher)
-		}
-	}
-
-	// Temporary until output format feature is added
-	var format string = "json"
-
-	if format == "json" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `json:"user"`
-				System []string `json:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = json.MarshalIndent(watchers, "", "  ")
-	}
-	if format == "yaml" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `yaml:"user"`
-				System []string `yaml:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = yaml.Marshal(watchers)
-	}
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-
-	return nil
+	err = watcherList.display(outputFmt)
+	return err
 }
 
 // GET /.watches/_search?filter_path=hits.hits._id,hits.hits._source.status.state.active
@@ -461,56 +451,8 @@ func WatcherShowInactive(esClient *elastic7.Client, outputFmt string) error {
 		return err
 	}
 
-	// Only include the necessary stuff. List comprehension would be great here
-	// Refactor into its own function
-	// Cluster created watchers
-	systemWatchers := make([]string, 0)
-	// User created watchers
-	userWatchers := make([]string, 0)
-	var fc string
-	var b []byte
+	watcherList := WatcherListOutput{Watchers: watchers}
 
-	for _, watcher := range watchers {
-		fc = string(watcher[0])
-		// ask elastic booth about the dash prefix
-		// Dash prefix is specific to elastic cloud clusters
-		if fc == "-" {
-			systemWatchers = append(systemWatchers, watcher)
-		} else {
-			userWatchers = append(userWatchers, watcher)
-		}
-	}
-
-	// Temporary until output format feature is added
-	var format string = "json"
-
-	if format == "json" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `json:"user"`
-				System []string `json:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = json.MarshalIndent(watchers, "", "  ")
-	}
-	if format == "yaml" {
-		var watchers struct {
-			Watchers struct {
-				User   []string `yaml:"user"`
-				System []string `yaml:"system"`
-			} `json:"watchers"`
-		}
-		watchers.Watchers.System = systemWatchers
-		watchers.Watchers.User = userWatchers
-		b, err = yaml.Marshal(watchers)
-	}
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(b))
-
-	return nil
-
+	err = watcherList.display(outputFmt)
+	return err
 }
