@@ -76,13 +76,26 @@ func (c *CommandOptions) SetWatcherInitInactive(a bool) {
 	}
 }
 
+func (c *CommandOptions) SetVerbose(a bool) {
+	if a {
+		c.Verbose = true
+	}
+}
+
 func (c *ConfigOptions) SetDebug(a bool) {
 	if a {
 		c.Debug = true
 	}
 }
-func (c *CommandOptions) SetVerbose(a bool) {
-	if a {
-		c.Verbose = true
+
+func (c *ConfigOptions) SetConfigFile(a string) {
+	if a != "" {
+		c.ConfigFile = a
+	}
+}
+
+func (c *ConfigOptions) SetContext(a string) {
+	if a != "" {
+		c.Context = a
 	}
 }

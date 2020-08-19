@@ -73,3 +73,22 @@ func genClient(ctx string) (client *elastic7.Client, err error) {
 	}
 	return client, err
 }
+
+func genClientWOpts(c *opts.ConfigOptions) (client *elastic7.Client, err error) {
+
+	// This can be changed to viper's config reading
+	file = os.Expand(c.ConfigFile, os.Getenv)
+	fileConfig, err := escfg.ReadConfig(file)
+	if err != nil {
+		return client, err
+	}
+	esConfig, err := escfg.GenESConfig(fileConfig, c.Context, c.Debug)
+	if err != nil {
+		return client, err
+	}
+	client, err = esauth.EsAuth(esConfig)
+	if err != nil {
+		return client, err
+	}
+	return client, err
+}

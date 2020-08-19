@@ -10,7 +10,7 @@ import (
 
 // GET /_cluster/info
 // This endpoint is special because it doesn't have a <foo>Request struct
-func GetClusterInfo(esClient *elastic7.Client, cfgOpts *opts.CommandOptions) error {
+func GetClusterInfo(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 
 	// Why are InfoRequest and Info() not documented in v7.8.0?
 	req := esapi.InfoRequest{
@@ -18,37 +18,37 @@ func GetClusterInfo(esClient *elastic7.Client, cfgOpts *opts.CommandOptions) err
 		Pretty: true,
 	}
 
-	// Flag init
-	outputFmt := cfgOpts.OutputFormat
 	// Boilerplate
-	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
 		return err
 	}
 	// // Print bytes
-	err = esutil.ParseBytes(b, changedField, outputFmt)
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
 }
 
 // GET /_cluster/health
-func GetClusterHealth(esClient *elastic7.Client, cfgOpts *opts.CommandOptions) error {
+func GetClusterHealth(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	req := esapi.ClusterHealthRequest{
 		Human:  true,
 		Pretty: true,
 	}
 
-	// Flag init
-	outputFmt := cfgOpts.OutputFormat
 	// Boilerplate
-	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
 		return err
 	}
 	// // Print bytes
-	err = esutil.ParseBytes(b, changedField, outputFmt)
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
 }

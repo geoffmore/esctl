@@ -23,15 +23,12 @@ var getClusterInfo = &cobra.Command{
 	Short: "Get cluster-info",
 	Long:  `No Description`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// Boilerplate //
-		// Flag init
-		initPersistentCmdOpts(cmd, cmdOpts)
+		// Command init
 		initCmdOpts(cmd, cmdOpts)
 		// Client init
-		initPersistentCfgOpts(cmd, cfgOpts)
 		initCfgOpts(cmd, cfgOpts)
-		client, err := genClient(context)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -49,13 +46,16 @@ var getClusterHealth = &cobra.Command{
 	Long:  `No Description`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
-		// Flag init
-		initPersistentCmdOpts(cmd, cmdOpts)
+		// Command init
 		initCmdOpts(cmd, cmdOpts)
 		// Client init
-		initPersistentCfgOpts(cmd, cfgOpts)
 		initCfgOpts(cmd, cfgOpts)
-		client, err := genClient(context)
+		client, err := genClientWOpts(cfgOpts)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Everything else
+		err = escmd.GetClusterInfo(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}

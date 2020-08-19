@@ -7,6 +7,7 @@ import (
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/geoffmore/esctl/pkg/opts"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
@@ -200,4 +201,84 @@ func FilenameToReader(name string) (*bytes.Reader, error) {
 	}
 
 	return r, nil
+}
+
+// Attempt to change the value of an arbitrary boolean type field
+// Return whether the field exists and could be set
+func SetBool(s reflect.Value, field string, a bool) bool {
+
+	var fieldExists bool = s.FieldByName(field).IsValid()
+	var canSet bool = s.CanSet()
+
+	if s.Kind() == reflect.Struct {
+		if fieldExists && canSet {
+			// Attempt to change value
+			s.FieldByName(field).SetBool(a)
+		}
+	}
+	return fieldExists && canSet
+}
+
+// Attempt to change the value of an arbitrary string type field
+// Return whether the field exists and could be set
+func SetString(s reflect.Value, field string, a string) bool {
+
+	var fieldExists bool = s.FieldByName(field).IsValid()
+	var canSet bool = s.CanSet()
+
+	if s.Kind() == reflect.Struct {
+		if fieldExists && canSet {
+			// Attempt to change value
+			s.FieldByName(field).SetString(a)
+		}
+	}
+	return fieldExists && canSet
+}
+
+// Attempt to change the value of an arbitrary int64 type field
+// Return whether the field exists and could be set
+func SetInt(s reflect.Value, field string, a int64) bool {
+
+	var fieldExists bool = s.FieldByName(field).IsValid()
+	var canSet bool = s.CanSet()
+
+	if s.Kind() == reflect.Struct {
+		if fieldExists && canSet {
+			// Attempt to change value
+			s.FieldByName(field).SetInt(a)
+		}
+	}
+	return fieldExists && canSet
+}
+
+// Attempt to set all fields contained in opts.CommandOptions according to the
+// map opts.CmdsToFieldNames
+func SetAllCmdOpts(v reflect.Value, c *opts.CommandOptions) map[string]bool {
+
+	cmdOpts := opts.CmdsToFieldNames
+
+	// https://stackoverflow.com/questions/18926304
+	cv := reflect.ValueOf(c).Elem()
+	var changedFields map[string]bool = make(map[string]bool)
+
+	for cmdFieldName, structFieldName := range cmdOpts {
+		val := v.FieldByName(structFieldName)
+		if val.IsValid() {
+			// Type lookup is necessary here for the switch
+			switch t := val.Type().String(); t {
+			case "string":
+				changedFields[structFieldName] = SetString(v, structFieldName, cv.FieldByName(cmdFieldName).String())
+			//case "int":
+			// reflect's SetInt() expects int64
+			case "int64":
+				changedFields[structFieldName] = SetInt(v, structFieldName, cv.FieldByName(cmdFieldName).Int())
+			case "bool":
+				changedFields[structFieldName] = SetBool(v, structFieldName, cv.FieldByName(cmdFieldName).Bool())
+			}
+		} else {
+			// Handle the case where the field doesn't exist in the struct
+			changedFields[structFieldName] = false
+		}
+	}
+	return changedFields
 }
