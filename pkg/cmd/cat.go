@@ -39,13 +39,17 @@ var catIndices = &cobra.Command{
 	Use:   "indices",
 	Short: "GET /_cat/indices",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatIndices(client, outputFmt)
+		// Everything else
+		err = escmd.CatIndices(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -57,13 +61,17 @@ var catAliases = &cobra.Command{
 	Use:   "aliases",
 	Short: "GET /_cat/aliases",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatAliases(client, outputFmt)
+		// Everything else
+		err = escmd.CatAliases(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -75,13 +83,17 @@ var catTemplates = &cobra.Command{
 	Use:   "templates",
 	Short: "GET /_cat/templates",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatTemplates(client, outputFmt)
+		// Everything else
+		err = escmd.CatTemplates(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -93,13 +105,17 @@ var catAllocation = &cobra.Command{
 	Use:   "allocation",
 	Short: "GET /_cat/allocation",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatAllocation(client, outputFmt)
+		// Everything else
+		err = escmd.CatAllocation(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -111,13 +127,17 @@ var catShards = &cobra.Command{
 	Use:   "shards",
 	Short: "GET /_cat/shards",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatShards(client, outputFmt)
+		// Everything else
+		err = escmd.CatShards(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -129,13 +149,17 @@ var catMaster = &cobra.Command{
 	Use:   "master",
 	Short: "GET /_cat/master",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatMaster(client, outputFmt)
+		// Everything else
+		err = escmd.CatMaster(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -147,13 +171,17 @@ var catNodes = &cobra.Command{
 	Use:   "nodes",
 	Short: "GET /_cat/nodes",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatNodes(client, outputFmt)
+		// Everything else
+		err = escmd.CatNodes(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -165,13 +193,17 @@ var catTasks = &cobra.Command{
 	Use:   "tasks",
 	Short: "GET /_cat/tasks",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatTasks(client, outputFmt)
+		// Everything else
+		err = escmd.CatTasks(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -183,13 +215,17 @@ var catSegments = &cobra.Command{
 	Use:   "segments",
 	Short: "GET /_cat/segments",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatSegments(client, outputFmt)
+		// Everything else
+		err = escmd.CatSegments(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -201,13 +237,17 @@ var catCount = &cobra.Command{
 	Use:   "count",
 	Short: "GET /_cat/count",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatCount(client, outputFmt)
+		// Everything else
+		err = escmd.CatCount(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -219,13 +259,17 @@ var catRecovery = &cobra.Command{
 	Use:   "recovery",
 	Short: "GET /_cat/recovery",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatRecovery(client, outputFmt)
+		// Everything else
+		err = escmd.CatRecovery(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -237,13 +281,18 @@ var catHealth = &cobra.Command{
 	Use:   "health",
 	Short: "GET /_cat/health",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatHealth(client, outputFmt)
+		// Everything else
+		err = escmd.CatHealth(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -255,13 +304,18 @@ var catPendingTasks = &cobra.Command{
 	Use:   "pending-tasks",
 	Short: "GET /_cat/pending_tasks",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatPendingTasks(client, outputFmt)
+		// Everything else
+		err = escmd.CatPendingTasks(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -273,13 +327,18 @@ var catThreadPool = &cobra.Command{
 	Use:   "thread-pool",
 	Short: "GET /_cat/thread_pool",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatThreadPool(client, outputFmt)
+		// Everything else
+		err = escmd.CatThreadPool(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -291,13 +350,17 @@ var catPlugins = &cobra.Command{
 	Use:   "plugins",
 	Short: "GET /_cat/plugins",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatPlugins(client, outputFmt)
+		// Everything else
+		err = escmd.CatPlugins(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -309,13 +372,17 @@ var catFielddata = &cobra.Command{
 	Use:   "fielddata",
 	Short: "GET /_cat/fielddata",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatFielddata(client, outputFmt)
+		// Everything else
+		err = escmd.CatFielddata(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -327,13 +394,17 @@ var catNodeattrs = &cobra.Command{
 	Use:   "nodeattrs",
 	Short: "GET /_cat/nodeattrs",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatNodeattrs(client, outputFmt)
+		// Everything else
+		err = escmd.CatNodeattrs(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -345,13 +416,17 @@ var catRepositories = &cobra.Command{
 	Use:   "repositories",
 	Short: "GET /_cat/repositories",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = escmd.CatRepositories(client, outputFmt)
+		// Everything else
+		err = escmd.CatRepositories(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
