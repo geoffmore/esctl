@@ -7,6 +7,7 @@ import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl/pkg/esutil"
+	"github.com/geoffmore/esctl/pkg/opts"
 	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
@@ -19,15 +20,15 @@ import (
 
 // Having a default value that can be empty causes weird behaviour sometimes
 
-func WatcherPut(esClient *elastic7.Client, watch string, r io.Reader, initInactive bool, outputFmt string) error {
+func WatcherPut(esClient *elastic7.Client, watch string, reader io.Reader, cmdOpts *opts.CommandOptions) error {
 
 	var active bool
 	// This flip isn't ideal, but necessary
-	active = !initInactive
+	active = !cmdOpts.WatcherInitInactive
 
 	req := esapi.WatcherPutWatchRequest{
 		WatchID: watch,
-		Body:    r,
+		Body:    reader,
 		Active:  &active,
 
 		Pretty: true,
@@ -35,17 +36,20 @@ func WatcherPut(esClient *elastic7.Client, watch string, r io.Reader, initInacti
 	}
 
 	// Boilerplate
-	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
 		return err
 	}
 	// // Print bytes
-	err = esutil.ParseBytes(b, changedField, outputFmt)
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
 }
 
-func WatcherGet(esClient *elastic7.Client, watch string, outputFmt string) error {
+func WatcherGet(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
 	req := esapi.WatcherGetWatchRequest{
 		WatchID: watch,
 		Pretty:  true,
@@ -53,18 +57,19 @@ func WatcherGet(esClient *elastic7.Client, watch string, outputFmt string) error
 	}
 
 	// Boilerplate
-	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
 		return err
 	}
 	// // Print bytes
-	err = esutil.ParseBytes(b, changedField, outputFmt)
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
-
 }
-func WatcherDelete(esClient *elastic7.Client, watch string, outputFmt string) error {
+func WatcherDelete(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
 	req := esapi.WatcherDeleteWatchRequest{
 		WatchID: watch,
 		Pretty:  true,
@@ -72,17 +77,22 @@ func WatcherDelete(esClient *elastic7.Client, watch string, outputFmt string) er
 	}
 
 	// Boilerplate
-	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
 		return err
 	}
 	// // Print bytes
-	err = esutil.ParseBytes(b, changedField, outputFmt)
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
+
+	// Note: watcher delete does not recognize a 404 as "watcher not found" in
+	// the current iteration
 }
-func WatcherExecute(esClient *elastic7.Client, watch string, outputFmt string) error {
+func WatcherExecute(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
 	// Why do I need a body here?
 	//req := esapi.WatcherExecuteWatchRequest{
 	//	Body:   io.Reader,
@@ -95,7 +105,7 @@ func WatcherExecute(esClient *elastic7.Client, watch string, outputFmt string) e
 	//return err
 	return nil
 }
-func WatcherGetStats(esClient *elastic7.Client, outputFmt string) error {
+func WatcherGetStats(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	req := esapi.WatcherStatsRequest{
 		// Need to figure out how to pass a filter here
 		//Matric: []string
@@ -104,17 +114,19 @@ func WatcherGetStats(esClient *elastic7.Client, outputFmt string) error {
 	}
 
 	// Boilerplate
-	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
 		return err
 	}
 	// // Print bytes
-	err = esutil.ParseBytes(b, changedField, outputFmt)
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
 }
-func WatcherAck(esClient *elastic7.Client, watch string, outputFmt string) error {
+func WatcherAck(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
 	//req := esapi.CHANGEME{
 	//	Format: "json",
 	//	Pretty: true,
@@ -125,7 +137,7 @@ func WatcherAck(esClient *elastic7.Client, watch string, outputFmt string) error
 	//return err
 	return nil
 }
-func WatcherActivate(esClient *elastic7.Client, watch string, outputFmt string) error {
+func WatcherActivate(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
 	var watcherDesiredState bool = true
 
 	// Get the current state of the watcher
@@ -145,14 +157,16 @@ func WatcherActivate(esClient *elastic7.Client, watch string, outputFmt string) 
 		}
 
 		// Boilerplate
-		changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+		r := reflect.ValueOf(&req).Elem()
+		// Bring flags to the Request struct
+		changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 		// // Make a request to get bytes
 		b, err := esutil.RequestNew(req, esClient)
 		if err != nil {
 			return err
 		}
 		// // Print bytes
-		err = esutil.ParseBytes(b, changedField, outputFmt)
+		err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	}
 	return err
 }
@@ -198,7 +212,7 @@ func isWatchActive(esClient *elastic7.Client, watch string) (bool, error) {
 	return output.Status.State.Active, nil
 
 }
-func WatcherDeactivate(esClient *elastic7.Client, watch string, outputFmt string) error {
+func WatcherDeactivate(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
 	var watcherDesiredState bool = false
 
 	// Get the current state of the watcher
@@ -218,20 +232,21 @@ func WatcherDeactivate(esClient *elastic7.Client, watch string, outputFmt string
 		}
 
 		// Boilerplate
-		changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+		r := reflect.ValueOf(&req).Elem()
+		// Bring flags to the Request struct
+		changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 		// // Make a request to get bytes
 		b, err := esutil.RequestNew(req, esClient)
 		if err != nil {
 			return err
 		}
 		// // Print bytes
-		err = esutil.ParseBytes(b, changedField, outputFmt)
+		err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	}
-
 	return err
 }
 
-func WatcherServiceStop(esClient *elastic7.Client) error {
+func WatcherServiceStop(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	//req := esapi.CHANGEME{
 	//	Format: "json",
 	//	Pretty: true,
@@ -244,7 +259,7 @@ func WatcherServiceStop(esClient *elastic7.Client) error {
 }
 
 // /.watches/_search?filter_path=hits.hits._id
-func WatcherServiceStart(esClient *elastic7.Client) error {
+func WatcherServiceStart(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	//req := esapi.CHANGEME{
 	//	Format: "json",
 	//	Pretty: true,
@@ -310,7 +325,7 @@ type WatcherListOutput struct {
 }
 
 // List watchers present on the cluster
-func WatcherList(esClient *elastic7.Client, outputFmt string) error {
+func WatcherList(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 
 	// Create the request with a large inital size
 	var initSize int = 1000
@@ -362,7 +377,7 @@ func WatcherList(esClient *elastic7.Client, outputFmt string) error {
 
 	watcherList := WatcherListOutput{Watchers: watchers}
 
-	err = watcherList.display(outputFmt)
+	err = watcherList.display(cmdOpts.OutputFormat)
 	return err
 }
 
@@ -417,6 +432,9 @@ func (w WatcherListOutput) display(outputFmt string) error {
 	var err error
 	var b []byte
 
+	// WatcherListOutput.display(string) should probably leverage esutil in the
+	// future
+
 	switch outputFmt {
 	case "yaml":
 		b, err = yaml.Marshal(w)
@@ -428,7 +446,7 @@ func (w WatcherListOutput) display(outputFmt string) error {
 	return err
 }
 
-func WatcherShowActive(esClient *elastic7.Client, outputFmt string) error {
+func WatcherShowActive(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	var watcherDesiredState bool = true
 
 	watchers, err := reduceWatchersTo(esClient, watcherDesiredState)
@@ -438,12 +456,12 @@ func WatcherShowActive(esClient *elastic7.Client, outputFmt string) error {
 
 	watcherList := WatcherListOutput{Watchers: watchers}
 
-	err = watcherList.display(outputFmt)
+	err = watcherList.display(cmdOpts.OutputFormat)
 	return err
 }
 
 // GET /.watches/_search?filter_path=hits.hits._id,hits.hits._source.status.state.active
-func WatcherShowInactive(esClient *elastic7.Client, outputFmt string) error {
+func WatcherShowInactive(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	var watcherDesiredState bool = false
 
 	watchers, err := reduceWatchersTo(esClient, watcherDesiredState)
@@ -453,6 +471,6 @@ func WatcherShowInactive(esClient *elastic7.Client, outputFmt string) error {
 
 	watcherList := WatcherListOutput{Watchers: watchers}
 
-	err = watcherList.display(outputFmt)
+	err = watcherList.display(cmdOpts.OutputFormat)
 	return err
 }
