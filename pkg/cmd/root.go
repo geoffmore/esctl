@@ -5,6 +5,7 @@ import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/geoffmore/esctl/pkg/esauth"
 	"github.com/geoffmore/esctl/pkg/escfg"
+	"github.com/geoffmore/esctl/pkg/opts"
 	"github.com/geoffmore/esctl/pkg/version"
 	"github.com/spf13/cobra"
 	"os"
@@ -14,14 +15,17 @@ import (
 // Config file path
 var file string = os.Expand(escfg.DefaultElasticConfig, os.Getenv)
 
+// Initialize defaults
+var cfgOpts = opts.NewConfigOptions()
+var cmdOpts = opts.NewCommandOptions()
+
 var (
 	// Used for flags
 	outputFmt string
 	context   string
-	// What is the philosophical difference between debug and verbose?
-	// For now, debug stays and verbose does not
-	debug bool
-	// verbose bool
+	verbose   bool
+	debug     bool
+	cfgFile   string
 )
 
 var rootCmd = &cobra.Command{
@@ -34,6 +38,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFmt, "output", "o", "", "choice of output format")
 	rootCmd.PersistentFlags().StringVarP(&context, "context", "c", "", "choice of context to use for a command")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "", false, "debug connection")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "increase the verbosity of certain api endpoint repsonses")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "", "", "choice of context to use for a command")
 
 	// Note: Non-persistent flags do not appear to be inheritable
 	// See https://github.com/spf13/cobra/issues/747 for context on
@@ -58,6 +64,25 @@ func genClient(ctx string) (client *elastic7.Client, err error) {
 		return client, err
 	}
 	esConfig, err := escfg.GenESConfig(fileConfig, ctx, debug)
+	if err != nil {
+		return client, err
+	}
+	client, err = esauth.EsAuth(esConfig)
+	if err != nil {
+		return client, err
+	}
+	return client, err
+}
+
+func genClientWOpts(c *opts.ConfigOptions) (client *elastic7.Client, err error) {
+
+	// This can be changed to viper's config reading
+	file = os.Expand(c.ConfigFile, os.Getenv)
+	fileConfig, err := escfg.ReadConfig(file)
+	if err != nil {
+		return client, err
+	}
+	esConfig, err := escfg.GenESConfig(fileConfig, c.Context, c.Debug)
 	if err != nil {
 		return client, err
 	}
