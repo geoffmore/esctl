@@ -6,8 +6,9 @@ import (
 )
 
 // Initialize options passed to commands
-func initCmdOpts(cmd *cobra.Command, c *opts.CommandOptions) error {
+func initCmdOpts(cmd *cobra.Command, c *opts.CommandOptions, args []string) error {
 	// Persistent
+	c.SetArgs(args)
 	c.SetOutputFormat(outputFmt)
 	c.SetVerbose(verbose)
 	// Transient

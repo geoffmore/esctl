@@ -65,6 +65,11 @@ func (c *CommandOptions) SetOutputFormat(a string) error {
 	}
 }
 
+func (c *CommandOptions) SetArgs(args []string) error {
+	c.Args = make([]string, len(args))
+	c.Args = args
+	return nil
+}
 func (c *CommandOptions) SetInputFile(a string) error {
 	c.InputFile = a
 	return nil
