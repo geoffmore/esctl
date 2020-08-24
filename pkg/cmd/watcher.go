@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/geoffmore/esctl/pkg/esutil"
 	"github.com/geoffmore/esctl/pkg/watcher"
 	"github.com/spf13/cobra"
@@ -22,6 +21,7 @@ func init() {
 	watcherCmd.AddCommand(watcherGet)
 	watcherCmd.AddCommand(watcherDelete)
 	watcherCmd.AddCommand(watcherExecute)
+	watcherExecute.Flags().StringP("input-file", "f", "", "path to file. Use '-' to specify stdin")
 	watcherCmd.AddCommand(watcherAck)
 	watcherCmd.AddCommand(watcherActivate)
 	watcherCmd.AddCommand(watcherDeactivate)
@@ -45,12 +45,16 @@ var watcherPut = &cobra.Command{
 	Short: "PUT /_watcher/watch/<watch_id>",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		// Everything else
 		// Get the file name
 		inputFile, err := cmd.Flags().GetString("input-file")
 		if err != nil {
@@ -62,7 +66,7 @@ var watcherPut = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = watcher.WatcherPut(client, args[0], r, initInactive, outputFmt)
+		err = watcher.WatcherPut(client, r, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -73,20 +77,19 @@ var watcherPut = &cobra.Command{
 var watcherGet = &cobra.Command{
 	Use:   "get",
 	Short: "GET /_watcher/watch/<watch_id>",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Argument check
-		if len(args) != 1 {
-			errMsg := fmt.Sprintf("Invalid length of arguments. Expecting 1. Got %d\n", len(args))
-			log.Fatal("%s\n", errMsg)
-		}
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		//err = watcher.WatcherGet(client)
-		err = watcher.WatcherGet(client, args[0], outputFmt)
+		// Everything else
+		err = watcher.WatcherGet(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -97,20 +100,19 @@ var watcherGet = &cobra.Command{
 var watcherDelete = &cobra.Command{
 	Use:   "delete",
 	Short: "DELETE /_watcher/watch/<watch_id>",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Argument check
-		if len(args) != 1 {
-			errMsg := fmt.Sprintf("Invalid length of arguments. Expecting 1. Got %d\n", len(args))
-			log.Fatal("%s\n", errMsg)
-		}
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		//err = watcher.WatcherDelete(client)
-		err = watcher.WatcherDelete(client, args[0], outputFmt)
+		// Everything else
+		err = watcher.WatcherDelete(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -121,20 +123,29 @@ var watcherDelete = &cobra.Command{
 var watcherExecute = &cobra.Command{
 	Use:   "execute",
 	Short: "POST /watcher/watch/<watch_id>/_execute",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Argument check
-		if len(args) != 1 {
-			errMsg := fmt.Sprintf("Invalid length of arguments. Expecting 1. Got %d\n", len(args))
-			log.Fatal("%s\n", errMsg)
-		}
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		//err = watcher.WatcherExecute(client)
-		err = watcher.WatcherExecute(client, args[0], outputFmt)
+		// Everything else
+		// Get the file name
+		inputFile, err := cmd.Flags().GetString("input-file")
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Generate a reader
+		r, err := esutil.FilenameToReader(inputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = watcher.WatcherExecute(client, r, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -146,13 +157,17 @@ var watcherGetStats = &cobra.Command{
 	Use:   "get-stats",
 	Short: "GET /_watcher/stats",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = watcher.WatcherGetStats(client, outputFmt)
+		// Everything else
+		err = watcher.WatcherGetStats(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -163,20 +178,19 @@ var watcherGetStats = &cobra.Command{
 var watcherAck = &cobra.Command{
 	Use:   "ack",
 	Short: "PUT /_watcher/watch/<watch-id>/_ack",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Argument check
-		if len(args) != 1 {
-			errMsg := fmt.Sprintf("Invalid length of arguments. Expecting 1. Got %d\n", len(args))
-			log.Fatal("%s\n", errMsg)
-		}
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		//err = watcher.WatcherAck(client)
-		err = watcher.WatcherAck(client, args[0], outputFmt)
+		// Everything else
+		err = watcher.WatcherAck(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -187,20 +201,19 @@ var watcherAck = &cobra.Command{
 var watcherActivate = &cobra.Command{
 	Use:   "activate",
 	Short: "PUT _watcher/watch/<watch_id>/_activate",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Argument check
-		if len(args) != 1 {
-			errMsg := fmt.Sprintf("Invalid length of arguments. Expecting 1. Got %d\n", len(args))
-			log.Fatal("%s\n", errMsg)
-		}
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		//err = watcher.WatcherActivate(client)
-		err = watcher.WatcherActivate(client, args[0], outputFmt)
+		// Everything else
+		err = watcher.WatcherActivate(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -211,20 +224,19 @@ var watcherActivate = &cobra.Command{
 var watcherDeactivate = &cobra.Command{
 	Use:   "deactivate",
 	Short: "PUT _watcher/watch/<watch_id>/_deactivate",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// Argument check
-		if len(args) != 1 {
-			errMsg := fmt.Sprintf("Invalid length of arguments. Expecting 1. Got %d\n", len(args))
-			log.Fatal("%s\n", errMsg)
-		}
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		//err = watcher.WatcherDeactivate(client)
-		err = watcher.WatcherDeactivate(client, args[0], outputFmt)
+		// Everything else
+		err = watcher.WatcherDeactivate(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -236,13 +248,17 @@ var watcherServiceStop = &cobra.Command{
 	Use:   "service-stop",
 	Short: "POST /_watcher/_stop",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = watcher.WatcherServiceStop(client)
+		// Everything else
+		err = watcher.WatcherServiceStop(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -254,13 +270,17 @@ var watcherServiceStart = &cobra.Command{
 	Use:   "service-start",
 	Short: "POST /_watcher/_start",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = watcher.WatcherServiceStart(client)
+		// Everything else
+		err = watcher.WatcherServiceStart(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -272,13 +292,17 @@ var watcherList = &cobra.Command{
 	Use:   "list",
 	Short: "GET /.watches/_search?filter_path=hits.hits._id",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = watcher.WatcherList(client, outputFmt)
+		// Everything else
+		err = watcher.WatcherList(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -288,13 +312,17 @@ var watcherShowActive = &cobra.Command{
 	Use:   "show-active",
 	Short: "Show active watchers",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = watcher.WatcherShowActive(client, outputFmt)
+		// Everything else
+		err = watcher.WatcherShowActive(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -304,13 +332,17 @@ var watcherShowInactive = &cobra.Command{
 	Use:   "show-inactive",
 	Short: "Show inactive watchers",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
+		// Boilerplate //
+		// Command init
+		initCmdOpts(cmd, cmdOpts, args)
+		// Client init
+		initCfgOpts(cmd, cfgOpts)
+		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		err = watcher.WatcherShowInactive(client, outputFmt)
+		// Everything else
+		err = watcher.WatcherShowInactive(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}

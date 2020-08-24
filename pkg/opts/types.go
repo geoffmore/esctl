@@ -8,6 +8,7 @@ type ConfigOptions struct {
 
 type CommandOptions struct {
 	// Persistent
+	Args         []string
 	OutputFormat string
 	Verbose      bool
 	// Non-persistent
