@@ -41,7 +41,7 @@ var catIndices = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -63,7 +63,7 @@ var catAliases = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -85,7 +85,7 @@ var catTemplates = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -107,7 +107,7 @@ var catAllocation = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -129,7 +129,7 @@ var catShards = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -151,7 +151,7 @@ var catMaster = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -173,7 +173,7 @@ var catNodes = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -195,7 +195,7 @@ var catTasks = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -217,7 +217,7 @@ var catSegments = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -239,7 +239,7 @@ var catCount = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -261,7 +261,7 @@ var catRecovery = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -284,7 +284,7 @@ var catHealth = &cobra.Command{
 
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -307,7 +307,7 @@ var catPendingTasks = &cobra.Command{
 
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -330,7 +330,7 @@ var catThreadPool = &cobra.Command{
 
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -352,7 +352,7 @@ var catPlugins = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -374,7 +374,7 @@ var catFielddata = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -396,7 +396,7 @@ var catNodeattrs = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -418,7 +418,7 @@ var catRepositories = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)

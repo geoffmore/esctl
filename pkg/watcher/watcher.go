@@ -20,11 +20,13 @@ import (
 
 // Having a default value that can be empty causes weird behaviour sometimes
 
-func WatcherPut(esClient *elastic7.Client, watch string, reader io.Reader, cmdOpts *opts.CommandOptions) error {
+func WatcherPut(esClient *elastic7.Client, reader io.Reader, cmdOpts *opts.CommandOptions) error {
 
 	var active bool
 	// This flip isn't ideal, but necessary
 	active = !cmdOpts.WatcherInitInactive
+
+	watch := cmdOpts.Args[0]
 
 	req := esapi.WatcherPutWatchRequest{
 		WatchID: watch,
@@ -49,7 +51,10 @@ func WatcherPut(esClient *elastic7.Client, watch string, reader io.Reader, cmdOp
 	return err
 }
 
-func WatcherGet(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
+func WatcherGet(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
+
+	watch := cmdOpts.Args[0]
+
 	req := esapi.WatcherGetWatchRequest{
 		WatchID: watch,
 		Pretty:  true,
@@ -69,7 +74,10 @@ func WatcherGet(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOp
 	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
 }
-func WatcherDelete(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
+func WatcherDelete(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
+
+	watch := cmdOpts.Args[0]
+
 	req := esapi.WatcherDeleteWatchRequest{
 		WatchID: watch,
 		Pretty:  true,
@@ -92,13 +100,22 @@ func WatcherDelete(esClient *elastic7.Client, watch string, cmdOpts *opts.Comman
 	// Note: watcher delete does not recognize a 404 as "watcher not found" in
 	// the current iteration
 }
-func WatcherExecute(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
-	// Why do I need a body here?
+func WatcherExecute(esClient *elastic7.Client, reader io.Reader, cmdOpts *opts.CommandOptions) error {
 	//req := esapi.WatcherExecuteWatchRequest{
 	//	Body:   io.Reader,
 	//	Pretty: true,
 	//	Human:  true,
 	//}
+	// watch id is optional, if it is not provided, a body is needed
+	watch := cmdOpts.Args[0]
+
+	if watch == "" {
+
+	} else if cmdOpts.InputFile == "" {
+	} else {
+		return fmt.Errorf("Neither a watch id nor input file were provided. Unable to form a request")
+
+	}
 
 	//err := request(req, esClient)
 	fmt.Println("not yet implemented")
@@ -126,19 +143,23 @@ func WatcherGetStats(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) er
 	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
 }
-func WatcherAck(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
+func WatcherAck(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	//req := esapi.CHANGEME{
 	//	Format: "json",
 	//	Pretty: true,
 	//}
+
+	//watch := cmdOpts.Args[0]
 
 	//err := request(req, esClient)
 	fmt.Println("not yet implemented")
 	//return err
 	return nil
 }
-func WatcherActivate(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
+func WatcherActivate(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	var watcherDesiredState bool = true
+
+	watch := cmdOpts.Args[0]
 
 	// Get the current state of the watcher
 	isActive, err := isWatchActive(esClient, watch)
@@ -212,8 +233,10 @@ func isWatchActive(esClient *elastic7.Client, watch string) (bool, error) {
 	return output.Status.State.Active, nil
 
 }
-func WatcherDeactivate(esClient *elastic7.Client, watch string, cmdOpts *opts.CommandOptions) error {
+func WatcherDeactivate(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	var watcherDesiredState bool = false
+
+	watch := cmdOpts.Args[0]
 
 	// Get the current state of the watcher
 	isActive, err := isWatchActive(esClient, watch)

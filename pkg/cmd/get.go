@@ -25,7 +25,7 @@ var getClusterInfo = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -47,7 +47,7 @@ var getClusterHealth = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)

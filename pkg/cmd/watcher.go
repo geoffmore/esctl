@@ -21,6 +21,7 @@ func init() {
 	watcherCmd.AddCommand(watcherGet)
 	watcherCmd.AddCommand(watcherDelete)
 	watcherCmd.AddCommand(watcherExecute)
+	watcherExecute.Flags().StringP("input-file", "f", "", "path to file. Use '-' to specify stdin")
 	watcherCmd.AddCommand(watcherAck)
 	watcherCmd.AddCommand(watcherActivate)
 	watcherCmd.AddCommand(watcherDeactivate)
@@ -46,7 +47,7 @@ var watcherPut = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -65,7 +66,7 @@ var watcherPut = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = watcher.WatcherPut(client, args[0], r, cmdOpts)
+		err = watcher.WatcherPut(client, r, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -80,7 +81,7 @@ var watcherGet = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -88,7 +89,7 @@ var watcherGet = &cobra.Command{
 			log.Fatal(err)
 		}
 		// Everything else
-		err = watcher.WatcherGet(client, args[0], cmdOpts)
+		err = watcher.WatcherGet(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -103,7 +104,7 @@ var watcherDelete = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -111,7 +112,7 @@ var watcherDelete = &cobra.Command{
 			log.Fatal(err)
 		}
 		// Everything else
-		err = watcher.WatcherDelete(client, args[0], cmdOpts)
+		err = watcher.WatcherDelete(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -126,7 +127,7 @@ var watcherExecute = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -134,7 +135,17 @@ var watcherExecute = &cobra.Command{
 			log.Fatal(err)
 		}
 		// Everything else
-		err = watcher.WatcherExecute(client, args[0], cmdOpts)
+		// Get the file name
+		inputFile, err := cmd.Flags().GetString("input-file")
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Generate a reader
+		r, err := esutil.FilenameToReader(inputFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = watcher.WatcherExecute(client, r, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -148,7 +159,7 @@ var watcherGetStats = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -171,7 +182,7 @@ var watcherAck = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -179,7 +190,7 @@ var watcherAck = &cobra.Command{
 			log.Fatal(err)
 		}
 		// Everything else
-		err = watcher.WatcherAck(client, args[0], cmdOpts)
+		err = watcher.WatcherAck(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -194,7 +205,7 @@ var watcherActivate = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -202,7 +213,7 @@ var watcherActivate = &cobra.Command{
 			log.Fatal(err)
 		}
 		// Everything else
-		err = watcher.WatcherActivate(client, args[0], cmdOpts)
+		err = watcher.WatcherActivate(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -217,7 +228,7 @@ var watcherDeactivate = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -225,7 +236,7 @@ var watcherDeactivate = &cobra.Command{
 			log.Fatal(err)
 		}
 		// Everything else
-		err = watcher.WatcherDeactivate(client, args[0], cmdOpts)
+		err = watcher.WatcherDeactivate(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -239,7 +250,7 @@ var watcherServiceStop = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -261,7 +272,7 @@ var watcherServiceStart = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -283,7 +294,7 @@ var watcherList = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -303,7 +314,7 @@ var watcherShowActive = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
@@ -323,7 +334,7 @@ var watcherShowInactive = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts)
+		initCmdOpts(cmd, cmdOpts, args)
 		// Client init
 		initCfgOpts(cmd, cfgOpts)
 		client, err := genClientWOpts(cfgOpts)
