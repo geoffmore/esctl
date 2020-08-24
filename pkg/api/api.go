@@ -6,6 +6,7 @@ import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl/pkg/esutil"
+	"github.com/geoffmore/esctl/pkg/opts"
 	"io"
 	"net/http"
 	"reflect"
@@ -166,7 +167,10 @@ func newRequest(method, endpoint string, body io.Reader) (*http.Request, error) 
 	// url
 	return http.NewRequest(strings.ToUpper(method), path.String(), body)
 }
-func MakeGenericRequest(esClient *elastic7.Client, outputFmt, method, endpoint string) error {
+func MakeGenericRequest(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
+
+	method := cmdOpts.Args[0]
+	endpoint := cmdOpts.Args[1]
 
 	httpReq, err := newRequest(method, endpoint, nil)
 	if err != nil {
@@ -184,14 +188,15 @@ func MakeGenericRequest(esClient *elastic7.Client, outputFmt, method, endpoint s
 	req.Human = true
 
 	// Boilerplate
-	changedField := esutil.SetFormat(reflect.ValueOf(&req).Elem(), outputFmt)
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
-	//fmt.Printf(string(b))
 	if err != nil {
 		return err
 	}
 	// // Print bytes
-	err = esutil.ParseBytes(b, changedField, outputFmt)
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
 	return err
 }
