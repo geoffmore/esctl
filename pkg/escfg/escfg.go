@@ -2,13 +2,10 @@ package escfg
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/estransport"
 	"github.com/geoffmore/esctl/pkg/esauth"
-	"github.com/geoffmore/esctl/pkg/esutil"
 	"github.com/geoffmore/esctl/pkg/opts"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/yaml.v2"
@@ -52,37 +49,6 @@ func ReadConfig(file string) (cfg Config, err error) {
 	return cfg, err
 }
 
-// Marshal a Config into bytes
-func DisplayConfig(cfg Config) ([]byte, error) {
-	var b []byte
-	var err error
-	b, err = yaml.Marshal(cfg)
-	if err != nil {
-		err = errors.New("configMarshalError")
-		return b, err
-	}
-	return b, nil
-}
-
-// Write a Config into a file
-func writeConfig(cfg Config, file string) error {
-
-	var err error
-	var b []byte
-
-	b, err = DisplayConfig(cfg)
-	if err != nil {
-		err = fmt.Errorf("unable to marshal config")
-		return err
-	}
-	err = ioutil.WriteFile(file, b, os.FileMode(DefaultElasticConfigMode))
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
 // Check if a file exists
 func exists(name string) bool {
 	// https://stackoverflow.com/questions/12518876/how-to-check-if-a-file-exists-in-go
@@ -94,72 +60,9 @@ func exists(name string) bool {
 	return true
 }
 
-// Generate a configuration file for connecting to a local elasticsearch cluster
-// if a file is not found by path
-func ConfigGenDefaultConfig(cfgOpts *opts.ConfigOptions) (err error) {
-
-	file := cfgOpts.ConfigFile
-
-	if !exists(file) {
-		fmt.Printf("Default config file not found. Creating...\n")
-		err = writeConfig(DefaultConfig, file)
-	} else {
-		fmt.Printf("Config file found, refusing to overwrite...\n")
-	}
-	return err
-}
-
-// Return a list of contexts
-func GetContexts(cfg Config) []string {
-	var contexts []string
-	for _, context := range cfg.Contexts {
-		contexts = append(contexts, context.Name)
-	}
-	return contexts
-}
-
-// Change the value of Config.CurrentContext
-func UseContext(n string, cfg Config, file string) error {
-	var err error
-
-	contexts := GetContexts(cfg)
-	// Test to ensure input is not equal to current-context
-	if cfg.CurrentContext == n {
-		err = fmt.Errorf("Provided context matches current value")
-		return err
-	}
-
-	// Ensure provided context exists
-	var ctxInCtxs bool = false
-	for _, ctx := range contexts {
-		if ctx == n {
-			ctxInCtxs = true
-		}
-	}
-
-	if !ctxInCtxs {
-		err = fmt.Errorf("Context \"%s\" not found", n)
-		return err
-	}
-	// Change the value of current-context to provided context
-	cfg.CurrentContext = n
-	var b []byte
-	b, err = DisplayConfig(cfg)
-	if err != nil {
-		err = fmt.Errorf("unable to marshal config")
-		return err
-	}
-	err = ioutil.WriteFile(file, b, os.FileMode(DefaultElasticConfigMode))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // Test if a config file is valid by attempting to unmarshal into a Config
 // struct
-func IsValidCfg(b []byte) bool {
+func testConfig(b []byte) bool {
 	var cfg Config
 	err := yaml.Unmarshal(b, &cfg)
 	if err != nil {
@@ -380,43 +283,6 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 	return es7cfg, err
 }
 
-// Does there really need to be two return values?
-
-func testContext(cfg Config, context string, debug bool) (bool, error) {
-
-	// Initialize client. GenClient expects the file to exist, so we must work
-	// around it
-	esConfig, err := GenESConfig(cfg, context, debug)
-	if err != nil {
-		return false, err
-	}
-	client, err := esauth.EsAuth(esConfig)
-	if err != nil {
-		return false, err
-	}
-
-	req := esapi.InfoRequest{}
-	res, err := esutil.GetResponse(req, client)
-	if err != nil {
-		return false, err
-	}
-
-	// res.Status() returns a string "200 OK" if successful. It is safer to use
-	// the int value
-	if statusCode := res.StatusCode; statusCode != 200 {
-		//return false, fmt.Errorf("Unable to authenticate to cluster")
-		return false, fmt.Errorf("Unable to authenticate to cluster. Returned status code is '%d'\n", statusCode)
-	} else {
-		return true, nil
-	}
-}
-
-// Config functions
-
-func ConfigGenerateConfig() {}
-func ConfigShowConfig()     {}
-func ConfigTestConfig()     {}
-
 // This should probably get removed from cmd/root.go
 
 func GenClient(c *opts.ConfigOptions) (client *elastic7.Client, err error) {
@@ -435,59 +301,6 @@ func GenClient(c *opts.ConfigOptions) (client *elastic7.Client, err error) {
 		return client, err
 	}
 	return client, err
-}
-
-func (cfg1 Config) merge(cfg2 Config) (Config, error) {
-	var cfg3 Config = cfg1
-	var conflicts string = fmt.Sprintf("Unable to completely merge objects. Key collisions found. Collisions: \n")
-
-	var hasConflict bool
-	var clusterConflicts, contextConflicts, userConflicts []string
-	//cfg2 takes priority, but does not overwrite objects with the same name
-	// CurrentContext
-	cfg3.CurrentContext = cfg2.CurrentContext
-	// Clusters
-	for _, cluster := range cfg2.Clusters {
-		if !cfg3.hasCluster(cluster.Name) {
-			cfg3.Clusters = append(cfg3.Clusters, cluster)
-		} else {
-			hasConflict = true
-			clusterConflicts = append(clusterConflicts, cluster.Name)
-		}
-	}
-	// Contexts
-	for _, context := range cfg2.Contexts {
-		if !cfg3.hasContext(context.Name) {
-			cfg3.Contexts = append(cfg3.Contexts, context)
-		} else {
-			hasConflict = true
-			contextConflicts = append(contextConflicts, context.Name)
-		}
-	}
-	// Users
-	for _, user := range cfg2.Users {
-		if !cfg3.hasUser(user.Name) {
-			cfg3.Users = append(cfg3.Users, user)
-		} else {
-			hasConflict = true
-			userConflicts = append(userConflicts, user.Name)
-		}
-	}
-
-	if hasConflict {
-		if len(clusterConflicts) > 0 {
-			conflicts = conflicts + fmt.Sprintf("Clusters: %v\n", clusterConflicts)
-		}
-		if len(contextConflicts) > 0 {
-			conflicts = conflicts + fmt.Sprintf("Contexts: %v\n", contextConflicts)
-		}
-		if len(userConflicts) > 0 {
-			conflicts = conflicts + fmt.Sprintf("Users: %v\n", userConflicts)
-		}
-		return Config{}, fmt.Errorf("%s", conflicts)
-	}
-
-	return cfg3, nil
 }
 
 func NewConfig(baseContext string, fullContext string, configUsername string, cfgOpts *opts.ConfigOptions, credOpts *opts.CredentialOptions) (Config, error) {
@@ -532,57 +345,4 @@ func NewConfig(baseContext string, fullContext string, configUsername string, cf
 	}
 
 	return cfg, nil
-}
-
-func (c Config) hasCluster(name string) bool {
-	var contains bool
-	for _, cluster := range c.Clusters {
-		if cluster.Name == name {
-			contains = true
-		}
-	}
-	return contains
-}
-
-func (c Config) hasContext(name string) bool {
-	var contains bool
-	for _, context := range c.Contexts {
-		if context.Name == name {
-			contains = true
-		}
-	}
-	return contains
-}
-
-func (c Config) hasUser(name string) bool {
-	var contains bool
-	for _, user := range c.Users {
-		if user.Name == name {
-			contains = true
-		}
-	}
-	return contains
-}
-
-func (c Config) getContexts() []string {
-	var contexts = make([]string, len(c.Contexts))
-
-	for i, context := range c.Contexts {
-		contexts[i] = context.Name
-	}
-	return contexts
-}
-
-func (c Config) getContext(name string) (Context, error) {
-	var context Context
-	if !c.hasContext(name) {
-		return context, fmt.Errorf("Context '%s' not found\n", name)
-	}
-
-	for _, currentContext := range c.Contexts {
-		if name == currentContext.Name {
-			context = currentContext.Context
-		}
-	}
-	return context, nil
 }

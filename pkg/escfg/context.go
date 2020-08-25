@@ -38,7 +38,7 @@ func ConfigContextGen(cfgOpts *opts.ConfigOptions, cmdOpts *opts.CommandOptions,
 	// Validate config with api call
 	// Note, the cluster's '/' endpoint has the possibility of requiring no auth
 	// in which case, the test will still pass
-	isValidContext, err := testContext(newCfg, cfgOpts.Context, cfgOpts.Debug)
+	isValidContext, err := newCfg.testContext(cfgOpts.Context, cfgOpts.Debug)
 	if (!isValidContext) || (err != nil) {
 		return err
 	}
@@ -60,7 +60,7 @@ func ConfigContextGen(cfgOpts *opts.ConfigOptions, cmdOpts *opts.CommandOptions,
 		}
 	}
 
-	err = writeConfig(combinedCfg, cfgOpts.ConfigFile)
+	err = combinedCfg.write(cfgOpts.ConfigFile)
 
 	return err
 }
@@ -140,7 +140,7 @@ func ConfigContextTest(cfgOpts *opts.ConfigOptions, cmdOpts *opts.CommandOptions
 		return fmt.Errorf("Context doesn't exist")
 	}
 
-	isValidContext, err := testContext(cfg, currentContext, cfgOpts.Debug)
+	isValidContext, err := cfg.testContext(currentContext, cfgOpts.Debug)
 	if (!isValidContext) || (err != nil) {
 		return fmt.Errorf("Context is not valid")
 	}
@@ -168,7 +168,7 @@ func ConfigContextUse(cfgOpts *opts.ConfigOptions, cmdOpts *opts.CommandOptions)
 	if cfg.hasContext(context) {
 		cfg.CurrentContext = context
 		fmt.Printf("Writing changes...")
-		err = writeConfig(cfg, file)
+		err = cfg.write(file)
 		if err != nil {
 			return err
 		}

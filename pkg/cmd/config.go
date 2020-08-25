@@ -37,9 +37,9 @@ func init() {
 	configContextCmd.AddCommand(configContextTest)
 	configContextCmd.AddCommand(configContextUse)
 	// Config functions
-	//configCmd.AddCommand(configGenDefault)
-	//configCmd.AddCommand(configShow)
-	//configCmd.AddCommand(configTest)
+	configCmd.AddCommand(configGenDefault)
+	configCmd.AddCommand(configShow)
+	configCmd.AddCommand(configTest)
 
 }
 
@@ -181,32 +181,32 @@ var configGenDefault = &cobra.Command{
 	},
 }
 
-//var configShow = &cobra.Command{
-//	Use:   "show",
-//	Short: "Show the desired config",
-//	Run: func(cmd *cobra.Command, args []string) {
-//		// Boilerplate //
-//		initCfgOpts(cmd, cfgOpts)
-//
-//		// Everything else
-//		err := escfg.ConfigShow(cfgOpts)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//	},
-//}
+var configShow = &cobra.Command{
+	Use:   "show",
+	Short: "Show the desired config",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Boilerplate //
+		initCfgOpts(cmd, cfgOpts)
 
-//var configTest = &cobra.Command{
-//	Use:   "test",
-//	Short: "Test the desired config for syntax errors",
-//	Run: func(cmd *cobra.Command, args []string) {
-//		// Boilerplate //
-//		initCfgOpts(cmd, cfgOpts)
-//
-//		// Everything else
-//		err := escfg.ConfigTest(cfgOpts)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//	},
-//}
+		// Everything else
+		err := escfg.ConfigShow(cfgOpts)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
+}
+
+var configTest = &cobra.Command{
+	Use:   "test",
+	Short: "Test the desired config for syntax errors",
+	Run: func(cmd *cobra.Command, args []string) {
+		// Boilerplate //
+		initCfgOpts(cmd, cfgOpts)
+
+		// Everything else
+		err := escfg.ConfigTest(cfgOpts)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
+}
