@@ -18,6 +18,7 @@ var file string = os.Expand(escfg.DefaultElasticConfig, os.Getenv)
 // Initialize defaults
 var cfgOpts = opts.NewConfigOptions()
 var cmdOpts = opts.NewCommandOptions()
+var credOpts = opts.NewCredentialOptions()
 
 var (
 	// Used for flags

@@ -5,7 +5,11 @@ import (
 	"errors"
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/estransport"
+	"github.com/geoffmore/esctl/pkg/esauth"
+	"github.com/geoffmore/esctl/pkg/esutil"
+	"github.com/geoffmore/esctl/pkg/opts"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -92,7 +96,9 @@ func exists(name string) bool {
 
 // Generate a configuration file for connecting to a local elasticsearch cluster
 // if a file is not found by path
-func GenDefaultConfig(file string) (err error) {
+func ConfigGenDefaultConfig(cfgOpts *opts.ConfigOptions) (err error) {
+
+	file := cfgOpts.ConfigFile
 
 	if !exists(file) {
 		fmt.Printf("Default config file not found. Creating...\n")
@@ -375,4 +381,255 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 	}
 
 	return es7cfg, err
+}
+
+// Context functions
+
+func ConfigGenContext(cfgOpts *opts.ConfigOptions, cmdOpts *opts.CommandOptions, credOpts *opts.CredentialOptions) error {
+
+	var oldCfg, newCfg, combinedCfg Config
+
+	// Assign a naming scheme for the config file user and context fields
+	var baseContext, fullContext, configUsername string
+
+	// Context will be defined from args, not the context flag
+	baseContext = cmdOpts.Args[0]
+
+	if credOpts.User != "" {
+		configUsername = fmt.Sprintf("%s@%s", credOpts.User, baseContext)
+		fullContext = configUsername
+	} else {
+		configUsername = fmt.Sprint("%s-user", cfgOpts.Context)
+		fullContext = fmt.Sprintf("%s@%s", configUsername, baseContext)
+	}
+
+	// ... and the full context will be assigned to cfgOpts
+	cfgOpts.SetContext(fullContext)
+
+	newCfg, err := NewConfig(baseContext, fullContext, configUsername, cfgOpts, credOpts)
+	if err != nil {
+		return err
+	}
+
+	// Validate config with api call
+	// Note, the cluster's '/' endpoint has the possibility of requiring no auth
+	// in which case, the test will still pass
+	isValidContext, err := ConfigTestContext(newCfg, cfgOpts)
+	if (!isValidContext) || (err != nil) {
+		return err
+	}
+
+	configFileExists := exists(cfgOpts.ConfigFile)
+	if !configFileExists {
+		// Config file does not exist, write context as config
+		combinedCfg = newCfg
+	} else {
+		// Config file exists, add context to config
+		oldCfg, err = ReadConfig(cfgOpts.ConfigFile)
+		if err != nil {
+			return err
+		}
+		combinedCfg, err = oldCfg.merge(newCfg)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = writeConfig(combinedCfg, cfgOpts.ConfigFile)
+
+	return err
+}
+func ConfigGetCurrentContext() {}
+func ConfigShowContext() {
+	// Defaults to current context. Obfuscates sensitive info
+}
+
+// Does there really need to be two return values?
+
+func ConfigTestContext(cfg Config, cfgOpts *opts.ConfigOptions) (bool, error) {
+
+	// Initialize client. GenClient expects the file to exist, so we must work
+	// around it
+	esConfig, err := GenESConfig(cfg, cfgOpts.Context, cfgOpts.Debug)
+	if err != nil {
+		return false, err
+	}
+	client, err := esauth.EsAuth(esConfig)
+	if err != nil {
+		return false, err
+	}
+
+	req := esapi.InfoRequest{}
+	res, err := esutil.GetResponse(req, client)
+	if err != nil {
+		return false, err
+	}
+
+	// res.Status() returns a string "200 OK" if successful. It is safer to use
+	// the int value
+	if statusCode := res.StatusCode; statusCode != 200 {
+		//return false, fmt.Errorf("Unable to authenticate to cluster")
+		return false, fmt.Errorf("Unable to authenticate to cluster. Returned status code is '%d'\n", statusCode)
+	} else {
+		return true, nil
+	}
+}
+
+func ConfigUseContext() {}
+
+// Config functions
+
+func ConfigGenerateConfig() {}
+func ConfigShowConfig()     {}
+func ConfigTestConfig()     {}
+
+//configCmd.AddCommand(configGenConfig)
+//configCmd.AddCommand(configShowConfig)
+//configCmd.AddCommand(configTestConfig)
+
+// This should probably get removed from cmd/root.go
+
+func GenClient(c *opts.ConfigOptions) (client *elastic7.Client, err error) {
+	// This can be changed to viper's config reading
+	file := os.Expand(c.ConfigFile, os.Getenv)
+	fileConfig, err := ReadConfig(file)
+	if err != nil {
+		return client, err
+	}
+	esConfig, err := GenESConfig(fileConfig, c.Context, c.Debug)
+	if err != nil {
+		return client, err
+	}
+	client, err = esauth.EsAuth(esConfig)
+	if err != nil {
+		return client, err
+	}
+	return client, err
+}
+
+func (cfg1 Config) merge(cfg2 Config) (Config, error) {
+	var cfg3 Config = cfg1
+	var conflicts string = fmt.Sprintf("Unable to completely merge objects. Key collisions found. Collisions: \n")
+
+	var hasConflict bool
+	var clusterConflicts, contextConflicts, userConflicts []string
+	//cfg2 takes priority, but does not overwrite objects with the same name
+	// CurrentContext
+	cfg3.CurrentContext = cfg2.CurrentContext
+	// Clusters
+	for _, cluster := range cfg2.Clusters {
+		if !cfg3.hasCluster(cluster.Name) {
+			cfg3.Clusters = append(cfg3.Clusters, cluster)
+		} else {
+			hasConflict = true
+			clusterConflicts = append(clusterConflicts, cluster.Name)
+		}
+	}
+	// Contexts
+	for _, context := range cfg2.Contexts {
+		if !cfg3.hasContext(context.Name) {
+			cfg3.Contexts = append(cfg3.Contexts, context)
+		} else {
+			hasConflict = true
+			contextConflicts = append(contextConflicts, context.Name)
+		}
+	}
+	// Users
+	for _, user := range cfg2.Users {
+		if !cfg3.hasUser(user.Name) {
+			cfg3.Users = append(cfg3.Users, user)
+		} else {
+			hasConflict = true
+			userConflicts = append(userConflicts, user.Name)
+		}
+	}
+
+	if hasConflict {
+		if len(clusterConflicts) > 0 {
+			conflicts = conflicts + fmt.Sprintf("Clusters: %v\n", clusterConflicts)
+		}
+		if len(contextConflicts) > 0 {
+			conflicts = conflicts + fmt.Sprintf("Contexts: %v\n", contextConflicts)
+		}
+		if len(userConflicts) > 0 {
+			conflicts = conflicts + fmt.Sprintf("Users: %v\n", userConflicts)
+		}
+		return Config{}, fmt.Errorf("%s", conflicts)
+	}
+
+	return cfg3, nil
+}
+
+func NewConfig(baseContext string, fullContext string, configUsername string, cfgOpts *opts.ConfigOptions, credOpts *opts.CredentialOptions) (Config, error) {
+
+	var insecure string
+	if credOpts.Insecure {
+		insecure = "yes"
+	} else {
+		insecure = "no"
+	}
+
+	users := Users{
+		Name: configUsername,
+		User: User{
+			Name:     credOpts.User,
+			Password: credOpts.Password,
+			//ApiKey:   credOpts.APIKey,
+			//Token: Token{}
+		},
+	}
+
+	cluster := Cluster{
+		Name:             baseContext,
+		ElasticAddresses: credOpts.Addresses,
+		CloudID:          credOpts.CloudID,
+		AllowSelfSigned:  insecure,
+	}
+
+	contexts := Contexts{
+		Name: fullContext,
+		Context: Context{
+			Cluster: baseContext,
+			User:    fullContext,
+		},
+	}
+
+	cfg := Config{
+		CurrentContext: fullContext,
+		Users:          []Users{users},
+		Clusters:       []Cluster{cluster},
+		Contexts:       []Contexts{contexts},
+	}
+
+	return cfg, nil
+}
+
+func (c Config) hasCluster(name string) bool {
+	var contains bool
+	for _, cluster := range c.Clusters {
+		if cluster.Name == name {
+			contains = true
+		}
+	}
+	return contains
+}
+
+func (c Config) hasContext(name string) bool {
+	var contains bool
+	for _, context := range c.Contexts {
+		if context.Name == name {
+			contains = true
+		}
+	}
+	return contains
+}
+
+func (c Config) hasUser(name string) bool {
+	var contains bool
+	for _, user := range c.Users {
+		if user.Name == name {
+			contains = true
+		}
+	}
+	return contains
 }
