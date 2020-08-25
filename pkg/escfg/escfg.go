@@ -157,9 +157,6 @@ func UseContext(n string, cfg Config, file string) error {
 	return nil
 }
 
-// Test a named context
-func TestContext(n string) {}
-
 // Test if a config file is valid by attempting to unmarshal into a Config
 // struct
 func IsValidCfg(b []byte) bool {
@@ -383,74 +380,13 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 	return es7cfg, err
 }
 
-// Context functions
-
-func ConfigGenContext(cfgOpts *opts.ConfigOptions, cmdOpts *opts.CommandOptions, credOpts *opts.CredentialOptions) error {
-
-	var oldCfg, newCfg, combinedCfg Config
-
-	// Assign a naming scheme for the config file user and context fields
-	var baseContext, fullContext, configUsername string
-
-	// Context will be defined from args, not the context flag
-	baseContext = cmdOpts.Args[0]
-
-	if credOpts.User != "" {
-		configUsername = fmt.Sprintf("%s@%s", credOpts.User, baseContext)
-		fullContext = configUsername
-	} else {
-		configUsername = fmt.Sprint("%s-user", cfgOpts.Context)
-		fullContext = fmt.Sprintf("%s@%s", configUsername, baseContext)
-	}
-
-	// ... and the full context will be assigned to cfgOpts
-	cfgOpts.SetContext(fullContext)
-
-	newCfg, err := NewConfig(baseContext, fullContext, configUsername, cfgOpts, credOpts)
-	if err != nil {
-		return err
-	}
-
-	// Validate config with api call
-	// Note, the cluster's '/' endpoint has the possibility of requiring no auth
-	// in which case, the test will still pass
-	isValidContext, err := ConfigTestContext(newCfg, cfgOpts)
-	if (!isValidContext) || (err != nil) {
-		return err
-	}
-
-	configFileExists := exists(cfgOpts.ConfigFile)
-	if !configFileExists {
-		// Config file does not exist, write context as config
-		combinedCfg = newCfg
-	} else {
-		// Config file exists, add context to config
-		oldCfg, err = ReadConfig(cfgOpts.ConfigFile)
-		if err != nil {
-			return err
-		}
-		combinedCfg, err = oldCfg.merge(newCfg)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = writeConfig(combinedCfg, cfgOpts.ConfigFile)
-
-	return err
-}
-func ConfigGetCurrentContext() {}
-func ConfigShowContext() {
-	// Defaults to current context. Obfuscates sensitive info
-}
-
 // Does there really need to be two return values?
 
-func ConfigTestContext(cfg Config, cfgOpts *opts.ConfigOptions) (bool, error) {
+func testContext(cfg Config, context string, debug bool) (bool, error) {
 
 	// Initialize client. GenClient expects the file to exist, so we must work
 	// around it
-	esConfig, err := GenESConfig(cfg, cfgOpts.Context, cfgOpts.Debug)
+	esConfig, err := GenESConfig(cfg, context, debug)
 	if err != nil {
 		return false, err
 	}
@@ -475,17 +411,11 @@ func ConfigTestContext(cfg Config, cfgOpts *opts.ConfigOptions) (bool, error) {
 	}
 }
 
-func ConfigUseContext() {}
-
 // Config functions
 
 func ConfigGenerateConfig() {}
 func ConfigShowConfig()     {}
 func ConfigTestConfig()     {}
-
-//configCmd.AddCommand(configGenConfig)
-//configCmd.AddCommand(configShowConfig)
-//configCmd.AddCommand(configTestConfig)
 
 // This should probably get removed from cmd/root.go
 
@@ -632,4 +562,27 @@ func (c Config) hasUser(name string) bool {
 		}
 	}
 	return contains
+}
+
+func (c Config) getContexts() []string {
+	var contexts = make([]string, len(c.Contexts))
+
+	for i, context := range c.Contexts {
+		contexts[i] = context.Name
+	}
+	return contexts
+}
+
+func (c Config) getContext(name string) (Context, error) {
+	var context Context
+	if !c.hasContext(name) {
+		return context, fmt.Errorf("Context '%s' not found\n", name)
+	}
+
+	for _, currentContext := range c.Contexts {
+		if name == currentContext.Name {
+			context = currentContext.Context
+		}
+	}
+	return context, nil
 }
