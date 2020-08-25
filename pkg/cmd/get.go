@@ -55,11 +55,6 @@ var getClusterHealth = &cobra.Command{
 			log.Fatal(err)
 		}
 		// Everything else
-		err = escmd.GetClusterInfo(client, cmdOpts)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// Everything else
 		err = escmd.GetClusterHealth(client, cmdOpts)
 		if err != nil {
 			log.Fatal(err)

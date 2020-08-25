@@ -2,10 +2,11 @@ package escfg
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/estransport"
+	"github.com/geoffmore/esctl/pkg/esauth"
+	"github.com/geoffmore/esctl/pkg/opts"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -48,37 +49,6 @@ func ReadConfig(file string) (cfg Config, err error) {
 	return cfg, err
 }
 
-// Marshal a Config into bytes
-func DisplayConfig(cfg Config) ([]byte, error) {
-	var b []byte
-	var err error
-	b, err = yaml.Marshal(cfg)
-	if err != nil {
-		err = errors.New("configMarshalError")
-		return b, err
-	}
-	return b, nil
-}
-
-// Write a Config into a file
-func writeConfig(cfg Config, file string) error {
-
-	var err error
-	var b []byte
-
-	b, err = DisplayConfig(cfg)
-	if err != nil {
-		err = fmt.Errorf("unable to marshal config")
-		return err
-	}
-	err = ioutil.WriteFile(file, b, os.FileMode(DefaultElasticConfigMode))
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
 // Check if a file exists
 func exists(name string) bool {
 	// https://stackoverflow.com/questions/12518876/how-to-check-if-a-file-exists-in-go
@@ -90,73 +60,9 @@ func exists(name string) bool {
 	return true
 }
 
-// Generate a configuration file for connecting to a local elasticsearch cluster
-// if a file is not found by path
-func GenDefaultConfig(file string) (err error) {
-
-	if !exists(file) {
-		fmt.Printf("Default config file not found. Creating...\n")
-		err = writeConfig(DefaultConfig, file)
-	} else {
-		fmt.Printf("Config file found, refusing to overwrite...\n")
-	}
-	return err
-}
-
-// Return a list of contexts
-func GetContexts(cfg Config) []string {
-	var contexts []string
-	for _, context := range cfg.Contexts {
-		contexts = append(contexts, context.Name)
-	}
-	return contexts
-}
-
-// Change the value of Config.CurrentContext
-func UseContext(n string, cfg Config, file string) error {
-	var err error
-
-	contexts := GetContexts(cfg)
-	// Test to ensure input is not equal to current-context
-	if cfg.CurrentContext == n {
-		err = fmt.Errorf("Provided context matches current value")
-		return err
-	}
-
-	// Ensure provided context exists
-	var ctxInCtxs bool = false
-	for _, ctx := range contexts {
-		if ctx == n {
-			ctxInCtxs = true
-		}
-	}
-
-	if !ctxInCtxs {
-		err = fmt.Errorf("Context \"%s\" not found", n)
-		return err
-	}
-	// Change the value of current-context to provided context
-	cfg.CurrentContext = n
-	var b []byte
-	b, err = DisplayConfig(cfg)
-	if err != nil {
-		err = fmt.Errorf("unable to marshal config")
-		return err
-	}
-	err = ioutil.WriteFile(file, b, os.FileMode(DefaultElasticConfigMode))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Test a named context
-func TestContext(n string) {}
-
 // Test if a config file is valid by attempting to unmarshal into a Config
 // struct
-func IsValidCfg(b []byte) bool {
+func testConfig(b []byte) bool {
 	var cfg Config
 	err := yaml.Unmarshal(b, &cfg)
 	if err != nil {
@@ -375,4 +281,68 @@ func GenESConfig(cfg Config, ctx string, debug bool) (es7cfg elastic7.Config, er
 	}
 
 	return es7cfg, err
+}
+
+// This should probably get removed from cmd/root.go
+
+func GenClient(c *opts.ConfigOptions) (client *elastic7.Client, err error) {
+	// This can be changed to viper's config reading
+	file := os.Expand(c.ConfigFile, os.Getenv)
+	fileConfig, err := ReadConfig(file)
+	if err != nil {
+		return client, err
+	}
+	esConfig, err := GenESConfig(fileConfig, c.Context, c.Debug)
+	if err != nil {
+		return client, err
+	}
+	client, err = esauth.EsAuth(esConfig)
+	if err != nil {
+		return client, err
+	}
+	return client, err
+}
+
+func NewConfig(baseContext string, fullContext string, configUsername string, cfgOpts *opts.ConfigOptions, credOpts *opts.CredentialOptions) (Config, error) {
+
+	var insecure string
+	if credOpts.Insecure {
+		insecure = "yes"
+	} else {
+		insecure = "no"
+	}
+
+	users := Users{
+		Name: configUsername,
+		User: User{
+			Name:     credOpts.User,
+			Password: credOpts.Password,
+			//ApiKey:   credOpts.APIKey,
+			//Token: Token{}
+		},
+	}
+
+	cluster := Cluster{
+		Name:             baseContext,
+		ElasticAddresses: credOpts.Addresses,
+		CloudID:          credOpts.CloudID,
+		AllowSelfSigned:  insecure,
+	}
+
+	contexts := Contexts{
+		Name: fullContext,
+		Context: Context{
+			Cluster: baseContext,
+			User:    fullContext,
+		},
+	}
+
+	cfg := Config{
+		CurrentContext: fullContext,
+		Users:          []Users{users},
+		Clusters:       []Cluster{cluster},
+		Contexts:       []Contexts{contexts},
+	}
+
+	return cfg, nil
 }

@@ -116,6 +116,11 @@ func ParseBytes(b []byte, fmtExists bool, outputFmt string) (err error) {
 	return nil
 }
 
+func GetResponse(r esRequest, c *elastic7.Client) (*esapi.Response, error) {
+	res, err := r.Do(context.Background(), c.Transport)
+	return res, err
+}
+
 // Generic function used to execute requests and return bytes
 func RequestNew(r esRequest, c *elastic7.Client) ([]byte, error) {
 

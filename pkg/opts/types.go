@@ -1,5 +1,14 @@
 package opts
 
+type CredentialOptions struct {
+	Addresses []string
+	User      string
+	Password  string
+	APIKey    string
+	Token     string
+	Insecure  bool
+	CloudID   string
+}
 type ConfigOptions struct {
 	ConfigFile string
 	Context    string
