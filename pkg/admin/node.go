@@ -6,6 +6,7 @@ import (
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/geoffmore/esctl/pkg/esutil"
+	"github.com/geoffmore/esctl/pkg/opts"
 	"reflect"
 )
 
@@ -20,6 +21,35 @@ import (
 // and once for the extra stuff
 // I don't like that last output, so I'm going to leave it off. Too much work to
 // add that output with not enough value
+
+func NodeList(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
+
+	var fieldArray []string = []string{"ip", "heap.percent", "ram.percent", "cpu", "load_1m", "load_5m", "load_15m", "node.role", "master", "name", "disk.total", "disk.used", "disk.avail", "disk.used_percent"}
+	var sortArray []string = []string{"name:asc"}
+
+	req := esapi.CatNodesRequest{
+		Pretty: true,
+		Human:  true,
+
+		H: fieldArray,
+		S: sortArray,
+
+		V: &cmdOpts.Verbose,
+	}
+
+	// Boilerplate
+	r := reflect.ValueOf(&req).Elem()
+	// Bring flags to the Request struct
+	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+	// // Make a request to get bytes
+	b, err := esutil.RequestNew(req, esClient)
+	if err != nil {
+		return err
+	}
+	// // Print bytes
+	err = esutil.ParseBytes(b, changedFields["Format"], cmdOpts.OutputFormat)
+	return err
+}
 
 func ListNodes(esClient *elastic7.Client, outputFmt string, help bool) error {
 
