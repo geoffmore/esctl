@@ -80,23 +80,23 @@ var uncordon = &cobra.Command{
 	},
 }
 
-var drain = &cobra.Command{
-	// esctl admin list-nodes
-	Use:   "drain",
-	Short: "No description",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Boilerplate
-		client, err := genClient(context)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = admin.Drain(client, outputFmt, help, args[0])
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
-}
+//var drain = &cobra.Command{
+//	// esctl admin list-nodes
+//	Use:   "drain",
+//	Short: "No description",
+//	Run: func(cmd *cobra.Command, args []string) {
+//		// Boilerplate
+//		client, err := genClient(context)
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//
+//		err = admin.Drain(client, outputFmt, help, args[0])
+//		if err != nil {
+//			log.Fatal(err)
+//		}
+//	},
+//}
 
 var listNodes = &cobra.Command{
 	// esctl admin list-nodes
