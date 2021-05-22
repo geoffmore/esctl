@@ -7,7 +7,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/geoffmore/esctl
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.14
         environment:
           # https://github.com/cloudfoundry/go-buildpack/issues/71
           GO111MODULE: "on"

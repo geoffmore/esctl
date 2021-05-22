@@ -1,5 +1,3 @@
-// +build optional admin
-
 package admin
 
 import (
@@ -12,6 +10,10 @@ import (
 	"encoding/json"
 )
 
+// TODO - reintroduce ShowShards with newest boilerplate format
+// TODO - refactor existing functions to match verbiage standards
+// TODO - redo all functions to match newest boilerplate format
+/*
 func ShowShards(esClient *elastic7.Client, outputFmt string, help bool) error {
 
 	var sortArray []string = []string{"store:desc,index,shard"}
@@ -41,6 +43,7 @@ func ShowShards(esClient *elastic7.Client, outputFmt string, help bool) error {
 	return err
 
 }
+*/
 
 // Show the largest shards on data nodes by node
 func ShowBigShards(esClient *elastic7.Client, outputFmt string, help bool, shardsPerNode int) error {

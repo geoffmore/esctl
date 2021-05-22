@@ -1,11 +1,8 @@
-// +build optional admin
-
 package cmd
 
 import (
-	"github.com/geoffmore/esctl/pkg/admin"
-	//"github.com/geoffmore/esctl/pkg/escmd"
 	"errors"
+	"github.com/geoffmore/esctl/pkg/admin"
 	"github.com/spf13/cobra"
 	"log"
 	"strconv"
@@ -18,28 +15,24 @@ type verbCmd struct {
 	Aliases []string
 }
 
+// TODO - improve boilerplate for all functions in admin package
+// TODO - removal optional status of admin package
+// TODO - make verbCmd part of esutil and figure out a structure for commands at various levels
 var listCmd = verbCmd{Command: "list", Aliases: []string{"ls"}}
-var showCmd = verbCmd{Command: "show"}
+
+//var showCmd = verbCmd{Command: "show"}
 
 func init() {
 	rootCmd.AddCommand(adminCmd)
 	adminCmd.AddCommand(adminNode)
 	adminNode.AddCommand(adminNodeList)
-	//adminCmd.AddCommand(adminShard)
-	//adminCmd.AddCommand(cordon)
-	//adminCmd.AddCommand(drain)
-	//adminCmd.AddCommand(uncordon)
-	//adminCmd.AddCommand(adminTest)
-	//adminCmd.AddCommand(adminInt)
-	// Help gets its own subcommand because it probably makes sense
 	adminCmd.AddCommand(listNodes)
 	adminCmd.AddCommand(listNodesStorage)
+	// TODO - add showShards function with newest boilerplate
+	// adminCmd.AddCommand(showShards)
 	adminCmd.AddCommand(showBigShards)
 	adminCmd.AddCommand(showSmallShards)
 	adminCmd.AddCommand(showShardUsageByNode)
-	//adminCmd.AddCommand(helpCmd)
-	//helpCmd.AddCommand(helpCat)
-	//helpCat.AddCommand(helpCatIndices)
 }
 
 var adminAliases = [...]string{"adm"}
@@ -73,9 +66,16 @@ var adminNodeList = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts, args)
+
+		err := initCmdOpts(cmd, cmdOpts, args)
+		if err != nil {
+			log.Fatal(err)
+		}
 		// Client init
-		initCfgOpts(cmd, cfgOpts)
+		err = initCfgOpts(cmd, cfgOpts)
+		if err != nil {
+			log.Fatal(err)
+		}
 		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)
@@ -87,73 +87,6 @@ var adminNodeList = &cobra.Command{
 		}
 	},
 }
-
-//var cordon = &cobra.Command{
-//	// esctl admin list-nodes
-//	Use:   "cordon",
-//	Short: "No description",
-//	Run: func(cmd *cobra.Command, args []string) {
-//		// Boilerplate
-//		client, err := genClient(context)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		err = admin.Cordon(client, outputFmt, help)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//	},
-//}
-
-// Needs refactor of admin.Uncordon to new boilerplate format
-//var uncordon = &cobra.Command{
-//	// esctl admin list-nodes
-//	Use:   "uncordon",
-//	Short: "removed a node from exclusions list based on its name and ip",
-//	Args: cobra.MinimumNArgs(1),
-//	//Args: func(cmd *cobra.Command, args []string) error {
-//	//	if len(args) < 1 {
-//	//		return errors.New("requires a string argument")
-//	//	}
-//	//	return nil
-//	//},
-//
-//	Run: func(cmd *cobra.Command, args []string) {
-//		// Boilerplate //
-//		// Command init
-//		initCmdOpts(cmd, cmdOpts, args)
-//		// Client init
-//		initCfgOpts(cmd, cfgOpts)
-//		client, err := genClientWOpts(cfgOpts)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//		// Everything else
-//		err = admin.Uncordon(client, cmdOpts)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//	},
-//}
-
-//var drain = &cobra.Command{
-//	// esctl admin list-nodes
-//	Use:   "drain",
-//	Short: "No description",
-//	Run: func(cmd *cobra.Command, args []string) {
-//		// Boilerplate
-//		client, err := genClient(context)
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//
-//		err = admin.Drain(client, outputFmt, help, args[0])
-//		if err != nil {
-//			log.Fatal(err)
-//		}
-//	},
-//}
 
 var listNodes = &cobra.Command{
 	// esctl admin list-nodes
