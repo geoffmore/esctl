@@ -8,3 +8,4 @@
 - Removed broken esutil.MapToYamlBytes
 - Added hack/build.sh to build a local binary for testing
 - Added .gitignore
+- Update github.com/elastic/go-elasticsearch dep to 7.12.0
