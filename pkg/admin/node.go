@@ -1,5 +1,3 @@
-// +build optional admin
-
 package admin
 
 import (

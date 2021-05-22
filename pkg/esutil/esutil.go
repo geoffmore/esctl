@@ -11,13 +11,16 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
-	"strings"
 )
 
+// TODO - rename esutil to util or figure out a better name for this package
+// TODO - split this until its own types file
 type esRequest interface {
 	Do(context.Context, esapi.Transport) (*esapi.Response, error)
 }
 
+// TODO - remove this in the future if not needed
+/*
 // Deserialize a response into a generic interface
 func Des(esRes *esapi.Response) (r map[string]interface{}, err error) {
 	//statusCode := esRes.StatusCode
@@ -30,7 +33,10 @@ func Des(esRes *esapi.Response) (r map[string]interface{}, err error) {
 
 	return r, err
 }
+*/
 
+// TODO - remove this in the future if not needed
+/*
 // Display a generic interface as yaml
 func MapToYamlish(r map[string]interface{}, s int) {
 	var nestedMap map[string]interface{}
@@ -59,12 +65,19 @@ func MapToYamlish(r map[string]interface{}, s int) {
 		}
 	}
 }
+*/
 
+// TODO - remove this in the future if not needed
+/*
 // Convert a generic interface of type map[string]interface{} to yaml bytes
 func MapToYamlBytes(r map[string]interface{}) (b []byte, err error) {
 	return b, err
 }
+*/
 
+// TODO - remove this in the future if not needed
+// TODO - rename RequestNew -> Request afterwards
+/*
 // Generic function used to execute requests and print results
 func Request(r esRequest, c *elastic7.Client) error {
 
@@ -88,12 +101,15 @@ func Request(r esRequest, c *elastic7.Client) error {
 
 	return nil
 }
+*/
 
+// TODO - remove this in the future if not needed
+/*
 // Check if the 'Format' field exists for a struct beneath a provided interface
 func FormatExists(i interface{}) bool {
 	return reflect.ValueOf(i).FieldByName("Format").IsValid()
 }
-
+*/
 // Convert bytes into a desired output format
 func ParseBytes(b []byte, fmtExists bool, outputFmt string) (err error) {
 	if outputFmt == "yaml" && !fmtExists {
@@ -104,12 +120,7 @@ func ParseBytes(b []byte, fmtExists bool, outputFmt string) (err error) {
 		}
 		b, err = yaml.Marshal(iface)
 		if err != nil {
-			// MapToYamlBytes needs to correctly handle generic interfaces without
-			// recursion (unless said recursion relies on a pointer to a byte
-			b, err = MapToYamlBytes(iface)
-			if err != nil {
-				return err
-			}
+			return err
 		}
 	}
 	fmt.Println(string(b))
@@ -139,7 +150,15 @@ func RequestNew(r esRequest, c *elastic7.Client) ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
-	defer res.Body.Close()
+	// https://tour.golang.org/moretypes/25
+	// https://stackoverflow.com/questions/57740428/handling-errors-in-defer
+	defer func() {
+		err = res.Body.Close()
+	}()
+
+	if err != nil {
+		return b, err
+	}
 
 	return b, nil
 }
