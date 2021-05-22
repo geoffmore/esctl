@@ -7,3 +7,4 @@
 - Caught previously uncaught errors throughout packages
 - Removed broken esutil.MapToYamlBytes
 - Added hack/build.sh to build a local binary for testing
+- Added .gitignore
