@@ -8,6 +8,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(apiCmd)
+	apiCmd.Flags().StringVarP(&bodyFile, "body", "f", "", "Path to file to use as input.")
 }
 
 var apiCmd = &cobra.Command{
@@ -18,9 +19,16 @@ var apiCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Boilerplate //
 		// Command init
-		initCmdOpts(cmd, cmdOpts, args)
+		err := initCmdOpts(cmd, cmdOpts, args)
+		if err != nil {
+			log.Fatal(err)
+		}
 		// Client init
-		initCfgOpts(cmd, cfgOpts)
+		err = initCfgOpts(cmd, cfgOpts)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		client, err := genClientWOpts(cfgOpts)
 		if err != nil {
 			log.Fatal(err)

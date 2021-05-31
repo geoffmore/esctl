@@ -40,7 +40,7 @@ func WatcherPut(esClient *elastic7.Client, reader io.Reader, cmdOpts *opts.Comma
 	// Boilerplate
 	r := reflect.ValueOf(&req).Elem()
 	// Bring flags to the Request struct
-	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+	changedFields := opts.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
@@ -64,7 +64,7 @@ func WatcherGet(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	// Boilerplate
 	r := reflect.ValueOf(&req).Elem()
 	// Bring flags to the Request struct
-	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+	changedFields := opts.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
@@ -87,7 +87,7 @@ func WatcherDelete(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) erro
 	// Boilerplate
 	r := reflect.ValueOf(&req).Elem()
 	// Bring flags to the Request struct
-	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+	changedFields := opts.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
@@ -133,7 +133,7 @@ func WatcherGetStats(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) er
 	// Boilerplate
 	r := reflect.ValueOf(&req).Elem()
 	// Bring flags to the Request struct
-	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+	changedFields := opts.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
@@ -180,7 +180,7 @@ func WatcherActivate(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) er
 		// Boilerplate
 		r := reflect.ValueOf(&req).Elem()
 		// Bring flags to the Request struct
-		changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+		changedFields := opts.SetAllCmdOpts(r, cmdOpts)
 		// // Make a request to get bytes
 		b, err := esutil.RequestNew(req, esClient)
 		if err != nil {
@@ -257,7 +257,7 @@ func WatcherDeactivate(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) 
 		// Boilerplate
 		r := reflect.ValueOf(&req).Elem()
 		// Bring flags to the Request struct
-		changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+		changedFields := opts.SetAllCmdOpts(r, cmdOpts)
 		// // Make a request to get bytes
 		b, err := esutil.RequestNew(req, esClient)
 		if err != nil {
