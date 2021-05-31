@@ -133,6 +133,7 @@ func newRequest(method, endpoint string, body io.Reader) (*http.Request, error) 
 	// Validate method
 	_, found := esutil.Find(httpRequestMethods, strings.ToUpper(method))
 	// This is incorrect, and I need to generate an error
+	// TODO - Create pkg/validation to contain various errors
 	if !found {
 		return nil, errors.New("InvalidMethodError")
 	}
