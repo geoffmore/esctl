@@ -1,5 +1,7 @@
 package opts
 
+import "io"
+
 type CredentialOptions struct {
 	Addresses []string
 	User      string
@@ -22,6 +24,7 @@ type CommandOptions struct {
 	Verbose      bool
 	// Non-persistent
 	InputFile           string
+	Body                io.Reader
 	WatcherInitInactive bool
 
 	// pretty and human aren't really configurable today. The current

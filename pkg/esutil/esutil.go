@@ -7,7 +7,6 @@ import (
 	"fmt"
 	elastic7 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/geoffmore/esctl/pkg/opts"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
@@ -18,90 +17,6 @@ import (
 type esRequest interface {
 	Do(context.Context, esapi.Transport) (*esapi.Response, error)
 }
-
-// TODO - remove this in the future if not needed
-/*
-// Deserialize a response into a generic interface
-func Des(esRes *esapi.Response) (r map[string]interface{}, err error) {
-	//statusCode := esRes.StatusCode
-	//header := esRes.Header
-
-	if err = json.NewDecoder(esRes.Body).Decode(&r); err != nil {
-		return r, err
-	}
-	defer esRes.Body.Close()
-
-	return r, err
-}
-*/
-
-// TODO - remove this in the future if not needed
-/*
-// Display a generic interface as yaml
-func MapToYamlish(r map[string]interface{}, s int) {
-	var nestedMap map[string]interface{}
-	spaces := s
-	if false {
-		fmt.Printf("%v", spaces)
-	}
-	for k, v := range r {
-		switch v.(type) {
-		default:
-			// Did not find a map as a value
-			fmt.Printf("%s%v: '%v'\n", strings.Repeat(" ", 2*(spaces)), k, v)
-		case map[string]interface{}:
-			// Found a map as a value
-			fmt.Printf("%v:\n", k)
-			// Explicitly create a map from that value, recurse
-			nestedMap = v.(map[string]interface{})
-			MapToYamlish(nestedMap, spaces+1)
-			// I need a way to use multiple interface types and iterate over them
-			// Maybe I add logic to figure out how to determine the type of the map
-			// interface thing?
-			//case map[int]interface{}:
-			//	fmt.Printf("%v:\n", k)
-			//	nestedMap = v.(map[int]interface{})
-			//	mapToYamlish(nestedMap, spaces+1)
-		}
-	}
-}
-*/
-
-// TODO - remove this in the future if not needed
-/*
-// Convert a generic interface of type map[string]interface{} to yaml bytes
-func MapToYamlBytes(r map[string]interface{}) (b []byte, err error) {
-	return b, err
-}
-*/
-
-// TODO - remove this in the future if not needed
-// TODO - rename RequestNew -> Request afterwards
-/*
-// Generic function used to execute requests and print results
-func Request(r esRequest, c *elastic7.Client) error {
-
-	res, err := r.Do(context.Background(), c.Transport)
-	if err != nil {
-		return err
-	}
-
-	// Check if status code is successful
-	if !(res.StatusCode >= 200 && res.StatusCode < 300) {
-		return fmt.Errorf("Status Code '%v' not in range 200-299. Exiting...\n", res.StatusCode)
-	}
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	fmt.Printf("%+v\n", string(b))
-
-	return nil
-}
-*/
 
 // TODO - remove this in the future if not needed
 /*
@@ -141,6 +56,7 @@ func RequestNew(r esRequest, c *elastic7.Client) ([]byte, error) {
 	if err != nil {
 		return b, err
 	}
+	// TODO - read first. Return response body
 	// Check if status code is successful
 	if !(res.StatusCode >= 200 && res.StatusCode < 300) {
 		return b, fmt.Errorf("Status Code '%v' not in range 200-299. Exiting...\n", res.StatusCode)
@@ -273,36 +189,4 @@ func SetInt(s reflect.Value, field string, a int64) bool {
 		}
 	}
 	return fieldExists && canSet
-}
-
-// Attempt to set all fields contained in opts.CommandOptions according to the
-// map opts.CmdsToFieldNames
-func SetAllCmdOpts(v reflect.Value, c *opts.CommandOptions) map[string]bool {
-
-	cmdOpts := opts.CmdsToFieldNames
-
-	// https://stackoverflow.com/questions/18926304
-	cv := reflect.ValueOf(c).Elem()
-	var changedFields map[string]bool = make(map[string]bool)
-
-	for cmdFieldName, structFieldName := range cmdOpts {
-		val := v.FieldByName(structFieldName)
-		if val.IsValid() {
-			// Type lookup is necessary here for the switch
-			switch t := val.Type().String(); t {
-			case "string":
-				changedFields[structFieldName] = SetString(v, structFieldName, cv.FieldByName(cmdFieldName).String())
-			//case "int":
-			// reflect's SetInt() expects int64
-			case "int64":
-				changedFields[structFieldName] = SetInt(v, structFieldName, cv.FieldByName(cmdFieldName).Int())
-			case "bool":
-				changedFields[structFieldName] = SetBool(v, structFieldName, cv.FieldByName(cmdFieldName).Bool())
-			}
-		} else {
-			// Handle the case where the field doesn't exist in the struct
-			changedFields[structFieldName] = false
-		}
-	}
-	return changedFields
 }

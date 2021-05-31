@@ -27,6 +27,7 @@ var (
 	verbose   bool
 	debug     bool
 	cfgFile   string
+	bodyFile  string
 )
 
 var rootCmd = &cobra.Command{
@@ -35,6 +36,8 @@ var rootCmd = &cobra.Command{
 	Version: version.Version,
 }
 
+// func initGlobalFlags
+// TODO - esctl should have an options subcommand that shows all available global flags. I should also mock kubectl's global flags
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFmt, "output", "o", "", "choice of output format")
 	rootCmd.PersistentFlags().StringVarP(&context, "context", "c", "", "choice of context to use for a command")

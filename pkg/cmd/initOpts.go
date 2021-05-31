@@ -9,24 +9,30 @@ import (
 // Initialize options passed to commands
 func initCmdOpts(cmd *cobra.Command, c *opts.CommandOptions, args []string) error {
 	// Persistent
-	c.SetArgs(args)
-	c.SetOutputFormat(outputFmt)
+	_ = c.SetArgs(args)
+	_ = c.SetOutputFormat(outputFmt)
 	c.SetVerbose(verbose)
 	// Transient
+	// TODO - remove input-file in favor of bodyFile
 	f, err := cmd.Flags().GetString("input-file")
 	if err == nil {
-		c.SetInputFile(f)
+		_ = c.SetInputFile(f)
 	}
 	initInactive, err := cmd.Flags().GetBool("initInactive")
 	if err == nil {
 		c.SetWatcherInitInactive(initInactive)
 	}
 
-	return nil
+	err = c.SetBody(bodyFile)
+
+	return err
 }
 
 // Initialize options used for client generation
 func initCfgOpts(cmd *cobra.Command, c *opts.ConfigOptions) error {
+	// Not sure how cmd should be used here
+	_ = cmd
+
 	// Persistent
 	c.SetDebug(debug)
 	c.SetConfigFile(cfgFile)
@@ -36,6 +42,9 @@ func initCfgOpts(cmd *cobra.Command, c *opts.ConfigOptions) error {
 }
 
 func initCredOpts(cmd *cobra.Command, c *opts.CredentialOptions) error {
+	// Not sure how cmd should be used here
+	_ = cmd
+
 	c.SetAddresses(strings.Split(addresses, ","))
 	c.SetUser(user)
 	c.SetPassword(pass)

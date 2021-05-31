@@ -1,6 +1,10 @@
 package opts
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/geoffmore/esctl/pkg/esutil"
+	"reflect"
+)
 
 func NewConfigOptions() *ConfigOptions {
 	const (
@@ -35,6 +39,7 @@ func NewCommandOptions() *CommandOptions {
 		InputFile:           defaultInputFile,
 		WatcherInitInactive: defaultWatcherInitInactive,
 		OutputFormat:        defaultOutputFormat,
+		Body:                nil,
 	}
 
 	return c
@@ -83,6 +88,15 @@ func (c *CommandOptions) SetArgs(args []string) error {
 func (c *CommandOptions) SetInputFile(a string) error {
 	c.InputFile = a
 	return nil
+}
+
+// TODO - this is one of the functions I have to implement
+func (c *CommandOptions) SetBody(a string) error {
+	b, err := esutil.FilenameToReader(a)
+	if err == nil {
+		c.Body = b
+	}
+	return err
 }
 
 func (c *CommandOptions) SetWatcherInitInactive(a bool) {
@@ -156,4 +170,36 @@ func (c *CredentialOptions) SetCloudID(a string) {
 	if a != "" {
 		c.CloudID = a
 	}
+}
+
+// Attempt to set all fields contained in CommandOptions according to the
+// map CmdsToFieldNames
+func SetAllCmdOpts(v reflect.Value, c *CommandOptions) map[string]bool {
+
+	cmdOpts := CmdsToFieldNames
+
+	// https://stackoverflow.com/questions/18926304
+	cv := reflect.ValueOf(c).Elem()
+	var changedFields map[string]bool = make(map[string]bool)
+
+	for cmdFieldName, structFieldName := range cmdOpts {
+		val := v.FieldByName(structFieldName)
+		if val.IsValid() {
+			// Type lookup is necessary here for the switch
+			switch t := val.Type().String(); t {
+			case "string":
+				changedFields[structFieldName] = esutil.SetString(v, structFieldName, cv.FieldByName(cmdFieldName).String())
+			//case "int":
+			// reflect's SetInt() expects int64
+			case "int64":
+				changedFields[structFieldName] = esutil.SetInt(v, structFieldName, cv.FieldByName(cmdFieldName).Int())
+			case "bool":
+				changedFields[structFieldName] = esutil.SetBool(v, structFieldName, cv.FieldByName(cmdFieldName).Bool())
+			}
+		} else {
+			// Handle the case where the field doesn't exist in the struct
+			changedFields[structFieldName] = false
+		}
+	}
+	return changedFields
 }
