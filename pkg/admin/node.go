@@ -38,7 +38,7 @@ func NodeList(esClient *elastic7.Client, cmdOpts *opts.CommandOptions) error {
 	// Boilerplate
 	r := reflect.ValueOf(&req).Elem()
 	// Bring flags to the Request struct
-	changedFields := esutil.SetAllCmdOpts(r, cmdOpts)
+	changedFields := opts.SetAllCmdOpts(r, cmdOpts)
 	// // Make a request to get bytes
 	b, err := esutil.RequestNew(req, esClient)
 	if err != nil {
